@@ -1,27 +1,24 @@
-
-//
-//  AnalysisResultOverlay.swift
-//  Earnie
-//
-//  Created by Somya Mittal on 18/2/2026.
-//
-
-import SwiftUI // Essential fix for the "View" scope error
+import SwiftUI
 
 struct AnalysisResultOverlay: View {
+    // MARK: - 1. DATA PARAMETERS
     let data: PayslipData
     var onDone: () -> Void
     
+    // MARK: - 2. MAIN BODY
     var body: some View {
         ZStack {
-            // Semi-transparent background for focus
+            
+            // MARK: Dimmed Background
             Color.black.opacity(0.6).edgesIgnoringSafeArea(.all)
                 .onTapGesture { onDone() }
             
+            // MARK: Popup Card
             VStack(spacing: 20) {
                 Text("Payslip Analyzed")
                     .font(.title2).fontWeight(.bold).foregroundColor(.white)
                 
+                // MARK: Data Rows
                 VStack(spacing: 12) {
                     ResultRow(label: "Gross Pay", amount: data.grossPay, icon: "dollarsign.circle.fill", color: .blue)
                     ResultRow(label: "Tax Withheld", amount: data.tax, icon: "building.columns.fill", color: .orange)
@@ -35,6 +32,7 @@ struct AnalysisResultOverlay: View {
                 .background(Color(white: 0.15))
                 .cornerRadius(16)
                 
+                // MARK: Done Button
                 Button(action: onDone) {
                     Text("Done")
                         .font(.headline)
@@ -50,7 +48,7 @@ struct AnalysisResultOverlay: View {
     }
 }
 
-// MARK: - Local ResultRow Component
+// MARK: - 3. REUSABLE ROW COMPONENT
 struct ResultRow: View {
     let label: String
     let amount: String
@@ -60,7 +58,10 @@ struct ResultRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .font(.title2).foregroundColor(color).frame(width: 40)
+                .font(.title2)
+                .foregroundColor(color)
+                .frame(width: 40)
+            
             VStack(alignment: .leading) {
                 Text(label).font(.caption).foregroundColor(.gray)
                 Text("$\(amount)").font(.title3).fontWeight(.bold).foregroundColor(.white)

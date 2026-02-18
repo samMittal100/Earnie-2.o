@@ -1,17 +1,11 @@
-//
-//  RosterScannerView.swift
-//  Earnie
-//
-//  Modified from Jeff's Code
-//
-
 import SwiftUI
 import Vision
 import PhotosUI
 import SwiftData
 
 struct RosterScannerView: View {
-    @Environment(\.modelContext) private var modelContext // Access to Database
+    // MARK: - 1. ENVIRONMENT & STATE
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) var dismiss
     
     // UI State
@@ -19,24 +13,21 @@ struct RosterScannerView: View {
     @State private var selectedImage: UIImage?
     @State private var isScanning = false
     
-    // Inputs
+    // Inputs & Results
     @State private var targetName: String = ""
-    
-    // Results
     @State private var rosterDateRange: String = "Date not found"
     @State private var weeklyShifts: [DailyShift] = []
     @State private var totalHours: Double = 0.0
     @State private var statusMessage: String = "Ready to scan"
-    
-    // Debug
     @State private var debugInfo: String = ""
     
+    // MARK: - 2. MAIN BODY
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     
-                    // 1. Controls
+                    // MARK: Scanner Controls
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Search Filter")
                             .font(.caption).bold().foregroundColor(.gray)
@@ -61,7 +52,7 @@ struct RosterScannerView: View {
                     
                     if isScanning { ProgressView("Mapping Grid Coordinates...") }
                     
-                    // 2. Status
+                    // MARK: Status Output
                     if !statusMessage.isEmpty && !isScanning {
                         Text(statusMessage)
                             .font(.caption)
@@ -70,7 +61,7 @@ struct RosterScannerView: View {
                             .padding(.horizontal)
                     }
                     
-                    // 3. Results & Save
+                    // MARK: Results & Save UI
                     if !weeklyShifts.isEmpty {
                         VStack(alignment: .leading, spacing: 15) {
                             // Header
@@ -113,7 +104,7 @@ struct RosterScannerView: View {
                                 Divider()
                             }
                             
-                            // MARK: - SAVE BUTTON (NEW)
+                            // Save Button
                             Button(action: saveRoster) {
                                 Text("Save Roster to Earnie")
                                     .font(.headline)
@@ -150,13 +141,12 @@ struct RosterScannerView: View {
         }
     }
     
-    // MARK: - SAVE LOGIC
+    // MARK: - 3. SAVE LOGIC
     func saveRoster() {
         for shift in weeklyShifts {
-            // We use the 'targetName' as the employer name loosely, or default to "Unknown"
-            // Since the roster usually belongs to the user, we might want a different field for Employer later.
+            // We use the 'targetName' as the employer name loosely
             let newRoster = Roster(
-                employerName: "Work", // Defaulting since OCR doesn't scan Employer Name yet
+                employerName: "Work",
                 shiftDate: shift.fullDate,
                 startTime: shift.startTime,
                 endTime: shift.endTime,
@@ -164,12 +154,10 @@ struct RosterScannerView: View {
             )
             modelContext.insert(newRoster)
         }
-        
-        // Close after saving
         dismiss()
     }
     
-    // MARK: - THE GRID ENGINE (UNCHANGED LOGIC, UPDATED STRUCTS)
+    // MARK: - 4. OCR GRID ENGINE
     func scanRosterGrid(image: UIImage) {
         isScanning = true
         weeklyShifts = []
@@ -215,16 +203,12 @@ struct RosterScannerView: View {
         DispatchQueue.global(qos: .userInitiated).async { try? handler.perform([request]) }
     }
     
-    // ... (Jeff's mapGridStructure, parseStartDate, findPersonRowY are SAME as before. Omitted for brevity, paste them here if you deleted them) ...
-    // Note: I will assume you have the mapGridStructure/etc functions. If not, I can paste them again.
-    
-    // MARK: - Step 1: Map Grid (Columns)
+    // Step 1: Map Grid
     func mapGridStructure(_ obs: [VNRecognizedTextObservation]) -> (CGFloat, [GridColumn])? {
         let dayKeywords = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
         let shortKeywords = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
         
         let lines = Dictionary(grouping: obs) { Int($0.boundingBox.midY * 100) }
-        
         var bestLineObs: [VNRecognizedTextObservation] = []
         var maxMatches = 0
         
@@ -283,7 +267,7 @@ struct RosterScannerView: View {
         return (headerY, cols)
     }
 
-    // MARK: - Step 2: Parse Start Date
+    // Step 2: Parse Start Date
     func parseStartDate(_ obs: [VNRecognizedTextObservation], headerY: CGFloat) -> Date? {
         let topObs = obs.filter { $0.boundingBox.minY > headerY }
         let pattern = #"(\d{1,2}\s*[a-zA-Z]{3})"#
@@ -306,12 +290,11 @@ struct RosterScannerView: View {
         return nil
     }
 
-    // MARK: - Step 3: Find Person Row
+    // Step 3: Find Person Row
     func findPersonRowY(name: String, observations: [VNRecognizedTextObservation]) -> CGFloat? {
         if name.isEmpty { return nil }
         let target = name.lowercased()
         
-        // Reuse header detection to find gutter
         let dayTokens = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday","mon","tue","wed","thu","fri","sat","sun"]
         let headerCandidates = observations.filter { obs in
             let text = obs.topCandidates(1).first?.string.lowercased() ?? ""
@@ -320,7 +303,6 @@ struct RosterScannerView: View {
         let firstColX = headerCandidates.map { ($0.boundingBox.minX + $0.boundingBox.maxX)/2 }.min() ?? 0.25
         let nameGutterMaxX = max(0.05, min(0.45, firstColX - 0.02))
         
-        // Scan for name
         let nearbyObs = observations.filter { $0.boundingBox.minX < nameGutterMaxX }
         for obs in nearbyObs {
             let text = obs.topCandidates(1).first?.string.lowercased() ?? ""
@@ -331,7 +313,7 @@ struct RosterScannerView: View {
         return nil
     }
 
-    // MARK: - Step 4: Extract Cells (UPDATED FOR DATES)
+    // Step 4: Extract Cells
     func extractCells(personY: CGFloat, columns: [GridColumn], observations: [VNRecognizedTextObservation], startDate: Date?) {
         var results: [DailyShift] = []
         let calendar = Calendar.current
@@ -348,7 +330,6 @@ struct RosterScannerView: View {
             let fullText = cellObs.compactMap { $0.topCandidates(1).first?.string }.joined(separator: " ")
             
             if !fullText.isEmpty {
-                // Calculate actual date
                 var shiftDate = Date()
                 var dateStr = ""
                 if let start = startDate, let d = calendar.date(byAdding: .day, value: index, to: start) {
@@ -356,11 +337,10 @@ struct RosterScannerView: View {
                     dateStr = formatDate(d)
                 }
                 
-                // Parse Time
                 if let shift = parseTime(fullText, on: shiftDate) {
                     results.append(DailyShift(
                         dayName: col.name,
-                        fullDate: shiftDate, // Save the actual Date object
+                        fullDate: shiftDate,
                         calculatedDateString: dateStr,
                         timeString: shift.label,
                         startTime: shift.start,
@@ -375,14 +355,13 @@ struct RosterScannerView: View {
         self.totalHours = results.reduce(0) { $0 + $1.hours }
     }
     
-    // MARK: - Time Parser (Updated to return Start/End Dates)
+    // MARK: - 5. TIME PARSERS
     func parseTime(_ text: String, on date: Date) -> (label: String, start: Date, end: Date, hours: Double)? {
         let clean = text.lowercased()
             .replacingOccurrences(of: "\n", with: " ")
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: ".", with: ":")
         
-        // Regex: 9am-5pm
         let rangePattern = #"(\d{1,2}(?::\d{2})?[ap]?[m]?)-(\d{1,2}(?::\d{2})?[ap]?[m]?)"#
         
         if let regex = try? NSRegularExpression(pattern: rangePattern),
@@ -390,7 +369,6 @@ struct RosterScannerView: View {
             let sStr = (clean as NSString).substring(with: match.range(at: 1))
             let eStr = (clean as NSString).substring(with: match.range(at: 2))
             
-            // Helper to combine Date + TimeString
             let (start, end, hours) = calculateDuration(sStr, eStr, on: date)
             
             if hours > 0 {
@@ -417,7 +395,6 @@ struct RosterScannerView: View {
         
         guard let t1 = parseTimeOnly(s), let t2 = parseTimeOnly(e) else { return (Date(), Date(), 0.0) }
         
-        // Combine with the specific Roster Date
         let calendar = Calendar.current
         let t1Comps = calendar.dateComponents([.hour, .minute], from: t1)
         let t2Comps = calendar.dateComponents([.hour, .minute], from: t2)
@@ -426,7 +403,6 @@ struct RosterScannerView: View {
         var end = calendar.date(bySettingHour: t2Comps.hour!, minute: t2Comps.minute!, second: 0, of: date) ?? date
         
         if end < start {
-            // Overnight shift, end is next day
             end = calendar.date(byAdding: .day, value: 1, to: end)!
         }
         
@@ -441,7 +417,7 @@ struct RosterScannerView: View {
     }
 }
 
-// MARK: - Updated Models
+// MARK: - 6. DATA MODELS
 struct GridColumn {
     let name: String
     var minX: CGFloat
@@ -452,10 +428,10 @@ struct GridColumn {
 struct DailyShift: Identifiable {
     let id = UUID()
     let dayName: String
-    let fullDate: Date         // Critical: Actual Date object
+    let fullDate: Date
     let calculatedDateString: String
     let timeString: String
-    let startTime: Date        // Critical: Actual Start Time
-    let endTime: Date          // Critical: Actual End Time
+    let startTime: Date
+    let endTime: Date
     let hours: Double
 }

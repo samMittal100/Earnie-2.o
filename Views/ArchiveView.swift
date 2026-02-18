@@ -1,13 +1,16 @@
 import SwiftUI
 
 struct ArchiveView: View {
+    // MARK: - 1. CUSTOM COLORS
     let bgColor = Color(red: 0.96, green: 0.96, blue: 0.98)
     let darkNavy = Color(red: 0.05, green: 0.2, blue: 0.3)
     let primaryBlue = Color(red: 0.58, green: 0.69, blue: 0.95)
     
+    // MARK: - 2. FILTER STATE
     @State private var startDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
     @State private var endDate = Date()
     
+    // MARK: - 3. MAIN BODY
     var body: some View {
         ZStack {
             bgColor.ignoresSafeArea()
@@ -15,7 +18,7 @@ struct ArchiveView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     
-                    // MARK: - Top Nav (Viewfinder Icon)
+                    // MARK: Top Nav (Scanner Icon)
                     HStack {
                         Spacer()
                         Button(action: {
@@ -30,14 +33,14 @@ struct ArchiveView: View {
                                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                         }
                     }
-                    .padding(.top, 20) // Fixed clipping issue
+                    .padding(.top, 20)
                     
-                    // MARK: - Header
+                    // MARK: Header
                     Text("Archives")
                         .font(.system(size: 34, weight: .bold))
                         .foregroundColor(darkNavy)
                     
-                    // MARK: - Native Date Range Filter (Cleaned Up)
+                    // MARK: Date Range Filter
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Filter by Date")
                             .font(.subheadline)
@@ -45,28 +48,30 @@ struct ArchiveView: View {
                             .foregroundColor(.gray)
                         
                         HStack(spacing: 30) {
-                            // "From" Date Picker
+                            // "From" Picker
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("FROM").font(.system(size: 10, weight: .bold)).foregroundColor(.gray)
                                 DatePicker("", selection: $startDate, displayedComponents: .date)
                                     .labelsHidden()
-                                    .tint(primaryBlue) // Brands the calendar pop-up
+                                    .tint(primaryBlue)
                             }
                             
-                            // "To" Date Picker
+                            // "To" Picker
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("TO").font(.system(size: 10, weight: .bold)).foregroundColor(.gray)
                                 DatePicker("", selection: $endDate, displayedComponents: .date)
                                     .labelsHidden()
-                                    .tint(primaryBlue) // Brands the calendar pop-up
+                                    .tint(primaryBlue)
                             }
-                            
-                            Spacer() // Pushes them neatly to the left
+                            Spacer()
                         }
                     }
                     .padding(.bottom, 10)
                     
-                    // MARK: - January Section
+                    // MARK: - 4. DUMMY DATA SECTIONS
+                    // (Jeff will replace these with SwiftData @Query loops later)
+                    
+                    // January
                     VStack(alignment: .leading, spacing: 12) {
                         Text("January")
                             .font(.headline)
@@ -77,7 +82,7 @@ struct ArchiveView: View {
                     }
                     .padding(.bottom, 10)
                     
-                    // MARK: - February Section
+                    // February
                     VStack(alignment: .leading, spacing: 12) {
                         Text("February")
                             .font(.headline)
@@ -87,7 +92,7 @@ struct ArchiveView: View {
                         ArchiveRow(dateRange: "15th - 2nd", total: "$235", isUnderpaid: false)
                     }
                     
-                    Spacer().frame(height: 120)
+                    Spacer().frame(height: 120) // Spacing for global tab bar
                 }
                 .padding(.horizontal, 24)
             }
@@ -95,7 +100,7 @@ struct ArchiveView: View {
     }
 }
 
-// MARK: - Archive Row Component
+// MARK: - 5. CUSTOM LIST COMPONENT
 struct ArchiveRow: View {
     var dateRange: String
     var total: String

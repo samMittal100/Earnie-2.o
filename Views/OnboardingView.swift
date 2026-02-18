@@ -1,20 +1,21 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    
+    // MARK: - 1. CUSTOM COLORS
     let primaryBlue = Color(red: 0.58, green: 0.69, blue: 0.95)
     let textColor = Color(red: 0.35, green: 0.35, blue: 0.45)
     
+    // MARK: - 2. NAVIGATION STATE
     @State private var navigateToHome = false
     
+    // MARK: - 3. MAIN BODY
     var body: some View {
         
         NavigationStack {
-            
             VStack {
-                
                 Spacer(minLength: 40)
                 
+                // MARK: Text & Branding
                 Text("Welcome to Earnie!")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(primaryBlue)
@@ -33,6 +34,7 @@ struct OnboardingView: View {
                 
                 Spacer()
                 
+                // MARK: Mascot Image
                 Image("EarnieMascot")
                     .resizable()
                     .scaledToFit()
@@ -40,6 +42,7 @@ struct OnboardingView: View {
                 
                 Spacer()
                 
+                // MARK: Call To Action Button
                 Button {
                     navigateToHome = true
                 } label: {
@@ -58,6 +61,7 @@ struct OnboardingView: View {
             .background(Color(.systemBackground).ignoresSafeArea())
             .navigationBarHidden(true)
             
+            // MARK: - 4. ROUTING
             .navigationDestination(isPresented: $navigateToHome) {
                 ContentView()
             }

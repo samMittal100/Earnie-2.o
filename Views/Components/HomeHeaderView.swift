@@ -1,8 +1,10 @@
-import SwiftUI // Essential fix
+import SwiftUI
 
 struct HomeHeaderView: View {
+    // MARK: - 1. PROPERTIES
     let name: String
     
+    // MARK: - 2. MAIN BODY
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Hi, \(name)")

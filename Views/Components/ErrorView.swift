@@ -1,30 +1,27 @@
-
-//
-//  ErrorView.swift
-//  Earnie
-//
-//  Created by Somya Mittal on 19/2/2026.
-//
-
 import SwiftUI
 
 struct ErrorView: View {
+    // MARK: - 1. DATA PARAMETERS
     var message: String
     var dismissAction: () -> Void
     
+    // MARK: - 2. CUSTOM COLORS
     let darkPurple = Color(red: 0.35, green: 0.32, blue: 0.45)
     let errorRed = Color(red: 0.95, green: 0.3, blue: 0.3)
     
+    // MARK: - 3. MAIN BODY
     var body: some View {
         ZStack {
-            // Darkens the app background so the user focuses on the error
+            
+            // MARK: Dimmed Background
             Color.black.opacity(0.4)
                 .ignoresSafeArea()
-                // Tapping the background also dismisses the error
                 .onTapGesture { dismissAction() }
             
+            // MARK: Error Card
             VStack(spacing: 25) {
-                // The Error Speech Bubble
+                
+                // MARK: Speech Bubble
                 Text(message)
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(darkPurple)
@@ -37,15 +34,14 @@ struct ErrorView: View {
                     )
                     .padding(.bottom, 20)
                 
-                // Earnie Mascot (You can reuse the exact same PNG)
+                // MARK: Sad Mascot
                 Image("characterRight")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 140)
-                    // Adding a grayscale filter makes him look "sad" or disabled
-                    .grayscale(0.5)
+                    .grayscale(0.5) // Makes him look disabled/sad
                 
-                // Try Again Button
+                // MARK: Try Again Button
                 Button(action: dismissAction) {
                     Text("Try Again")
                         .font(.headline)
@@ -59,7 +55,6 @@ struct ErrorView: View {
                 .padding(.top, 10)
             }
             .padding(30)
-            // Adds a glassmorphism card behind Earnie and the text
             .background(.ultraThinMaterial)
             .cornerRadius(30)
             .shadow(radius: 20)

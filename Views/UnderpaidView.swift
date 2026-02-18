@@ -1,18 +1,18 @@
 import SwiftUI
 
 struct UnderpaidView: View {
-    // MARK: - Data Parameters
+    // MARK: - 1. DATA PARAMETERS
     let totalBeforeTax: Double
     let underpaidAmount: Double
     let tax: Double
     let superAmount: Double
     let takeHome: Double
 
-    // MARK: - Custom Colors
+    // MARK: - 2. CUSTOM COLORS
     let primaryBlue = Color(red: 0.58, green: 0.69, blue: 0.95)
     let textColor = Color(red: 0.35, green: 0.35, blue: 0.45)
     
-    // MARK: - Navigation State
+    // MARK: - 3. NAVIGATION STATE
     @State private var shouldRedirect = false
     @State private var selectedTab: Tab = .upload
     
@@ -21,11 +21,12 @@ struct UnderpaidView: View {
         case archive
     }
     
-    // MARK: - Main Body
+    // MARK: - 4. MAIN BODY
     var body: some View {
         ZStack {
             // MARK: Routing Logic
             if shouldRedirect {
+                // Hand the data off to the chart view
                 AnalysisUnderpaidInsightView(
                     totalBeforeTax: totalBeforeTax,
                     underpaidAmount: underpaidAmount,
@@ -33,7 +34,7 @@ struct UnderpaidView: View {
                     superAmount: superAmount,
                     takeHome: takeHome
                 )
-                .transition(.opacity)
+                .transition(.opacity) // Smooth fade transition
             } else {
                 underpaidSplashContent
                     .transition(.opacity)
@@ -49,7 +50,7 @@ struct UnderpaidView: View {
         }
     }
     
-    // MARK: - Splash Screen Content
+    // MARK: - 5. SPLASH SCREEN CONTENT
     var underpaidSplashContent: some View {
         ZStack {
             primaryBlue.opacity(0.2).ignoresSafeArea()
@@ -96,8 +97,7 @@ struct UnderpaidView: View {
         }
     }
     
-    // MARK: - Unused Tab Bar Components (Hidden)
-    // Kept in the file so you don't lose the code, but hidden from the UI
+    // MARK: - 6. UNUSED TAB BAR COMPONENTS (HIDDEN)
     var glassTabBar: some View {
         HStack(spacing: 0) {
             tabButton(title: "Upload", icon: "square.and.arrow.up", tab: .upload)
@@ -139,4 +139,14 @@ struct UnderpaidView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
+}
+
+#Preview {
+    UnderpaidView(
+        totalBeforeTax: 565,
+        underpaidAmount: 106,
+        tax: 56,
+        superAmount: 61,
+        takeHome: 435
+    )
 }

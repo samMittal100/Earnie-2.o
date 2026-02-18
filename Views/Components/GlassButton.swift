@@ -1,19 +1,13 @@
-
-//
-//  GlassButton.swift
-//  Earnie
-//
-//  Created by Somya Mittal on 16/2/2026.
-//
-
 import SwiftUI
 
 struct GlassButton: View {
+    // MARK: - 1. DATA PARAMETERS
     var title: String
     var icon: String
     var color: Color = Color(white: 0.15)
     var action: () -> Void
 
+    // MARK: - 2. MAIN BODY
     var body: some View {
         Button(action: action) {
             HStack {
@@ -25,14 +19,12 @@ struct GlassButton: View {
                 
                 Image(systemName: icon)
                     .font(.title2)
-                
-
             }
             .padding()
             .frame(height: 72)
             .background(color)
             .foregroundColor(.white)
-            .cornerRadius(24) 
+            .cornerRadius(24)
             .overlay(
                 RoundedRectangle(cornerRadius: 24)
                     .stroke(Color.white.opacity(0.1), lineWidth: 1)

@@ -1,14 +1,7 @@
-//
-//  OCRProcessor.swift
-//  Earnie
-//
-//  Created by Somya Mittal on 18/2/2026.
-//
-
 import Vision
 import UIKit
 
-// The Data Structure
+// MARK: - 1. DATA STRUCTURES
 struct PayslipData: Equatable {
     var grossPay: String = "0.00"
     var tax: String = "0.00"
@@ -18,7 +11,8 @@ struct PayslipData: Equatable {
 
 class OCRProcessor {
     
-    // Universal Entry Point: Call this from anywhere (Camera, Photos, PDF)
+    // MARK: - 2. UNIVERSAL ENTRY POINT
+    // Call this from anywhere (Camera, Photos, PDF)
     static func recognizeText(from image: UIImage, completion: @escaping (PayslipData) -> Void) {
         guard let cgImage = image.cgImage else { return }
         
@@ -47,10 +41,7 @@ class OCRProcessor {
         DispatchQueue.global(qos: .userInitiated).async { try? handler.perform([request]) }
     }
     
-    // ==========================================
-    // MARK: - JEFF'S SORTING LOGIC (UNTOUCHED)
-    // ==========================================
-    
+    // MARK: - 3. ROW GROUPING LOGIC (JEFF'S LOGIC)
     private static func groupObservationsIntoRows(_ observations: [VNRecognizedTextObservation]) -> [PayslipRow] {
         // Sort by height (Top to Bottom)
         let sortedObservations = observations.sorted { $0.boundingBox.maxY > $1.boundingBox.maxY }
@@ -76,10 +67,7 @@ class OCRProcessor {
         return rows
     }
     
-    // ==========================================
-    // MARK: - SMART PARSER (THE FIX)
-    // ==========================================
-    
+    // MARK: - 4. SMART PARSER
     private static func parseRows(_ rows: [PayslipRow]) -> (gross: String, net: String, tax: String, superAmount: String) {
         var gross = "0.00"
         var net = "0.00"
@@ -96,7 +84,7 @@ class OCRProcessor {
             
             guard let val = numbersInRow.last else { continue }
             
-            // --- 1. GROSS PAY STRATEGY ---
+            // --- GROSS PAY STRATEGY ---
             if fullRowText.contains("total gross") || fullRowText.contains("total wages") {
                 // Gold Standard: "Total Gross" is definitely correct.
                 gross = val
@@ -111,7 +99,7 @@ class OCRProcessor {
                 }
             }
             
-            // --- 2. NET PAY STRATEGY ---
+            // --- NET PAY STRATEGY ---
             if fullRowText.contains("net pay") {
                 net = val
                 foundTotalNet = true
@@ -120,7 +108,7 @@ class OCRProcessor {
                 net = val
             }
             
-            // --- 3. TAX STRATEGY ---
+            // --- TAX STRATEGY ---
             if fullRowText.contains("tax") || fullRowText.contains("payg") || fullRowText.contains("withheld") {
                 // Ignore "Tax YTD" in footer
                 if !fullRowText.contains("ytd") {
@@ -128,7 +116,7 @@ class OCRProcessor {
                 }
             }
             
-            // --- 4. SUPER STRATEGY ---
+            // --- SUPER STRATEGY ---
             if fullRowText.contains("super") || fullRowText.contains("sgc") {
                 // Ignore "Superable Salary" headers or YTD totals
                 if !fullRowText.contains("salary") && !fullRowText.contains("ytd") {
@@ -141,7 +129,7 @@ class OCRProcessor {
     }
 }
 
-// Jeff's Helper Struct
+// MARK: - 5. HELPER STRUCTS
 struct PayslipRow {
     var yPosition: CGFloat
     var items: [VNRecognizedTextObservation]

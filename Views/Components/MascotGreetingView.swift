@@ -1,6 +1,6 @@
 import SwiftUI
 
-// 1. The Custom Mathematical Shape
+// MARK: - 1. CUSTOM MATHEMATICAL SHAPE
 struct SpeechBubbleShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -29,7 +29,7 @@ struct SpeechBubbleShape: Shape {
     }
 }
 
-// 2. The Updated Mascot View
+// MARK: - 2. MASCOT VIEW
 struct MascotGreetingView: View {
     let darkPurple = Color(red: 0.35, green: 0.32, blue: 0.45)
     
@@ -61,7 +61,6 @@ struct MascotGreetingView: View {
     }
 }
 
-// 3. The Preview
 #Preview {
     ZStack {
         // Adding the background color so you can actually see the white bubble

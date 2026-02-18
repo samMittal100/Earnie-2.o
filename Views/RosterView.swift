@@ -1,13 +1,12 @@
 import SwiftUI
 import Combine
 
-// MARK: - Enums
+// MARK: - 1. ENUMS & MODELS
 enum CalendarMode: String, CaseIterable {
     case week = "Week"
     case month = "Month"
 }
 
-// MARK: - Model
 struct Shift: Identifiable, Equatable {
     let id = UUID()
     var date: Date
@@ -22,7 +21,7 @@ struct Shift: Identifiable, Equatable {
     }
 }
 
-// MARK: - ViewModel
+// MARK: - 2. VIEW MODEL (LOGIC)
 class RosterViewModel: ObservableObject {
     
     @Published var selectedDate: Date = Date()
@@ -34,60 +33,57 @@ class RosterViewModel: ObservableObject {
     @Published var isRosterUploaded: Bool = false
     @Published var calendarMode: CalendarMode = .month
     
-    // MARK: - Roster Logic
-        func loadMockRoster() {
-            let calendar = Calendar.current
-            let today = Date()
+    func loadMockRoster() {
+        let calendar = Calendar.current
+        let today = Date()
+        
+        // Ensure we work with the current week relative to today for the mock
+        guard let monday = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)),
+              let tuesday = calendar.date(byAdding: .day, value: 1, to: monday),
+              let saturday = calendar.date(byAdding: .day, value: 5, to: monday),
+              let sunday = calendar.date(byAdding: .day, value: 6, to: monday)
+        else { return }
+        
+        // FAKE DATA ALIGNED WITH THE DEMO STORY
+        shifts = [
+            Shift(date: monday,
+                  startTime: setTime(for: monday, hour: 8, minute: 30),
+                  endTime: setTime(for: monday, hour: 17),
+                  breakDurationMinutes: 30),
             
-            // Ensure we work with the current week relative to today for the mock
-            guard let monday = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)),
-                  let tuesday = calendar.date(byAdding: .day, value: 1, to: monday),
-                  let saturday = calendar.date(byAdding: .day, value: 5, to: monday),
-                  let sunday = calendar.date(byAdding: .day, value: 6, to: monday)
-            else { return }
+            Shift(date: tuesday,
+                  startTime: setTime(for: tuesday, hour: 8, minute: 30),
+                  endTime: setTime(for: tuesday, hour: 17),
+                  breakDurationMinutes: 30),
             
-            // FAKE DATA ALIGNED WITH THE DEMO STORY
-            shifts = [
-                Shift(date: monday,
-                      startTime: setTime(for: monday, hour: 8, minute: 30),
-                      endTime: setTime(for: monday, hour: 17),
-                      breakDurationMinutes: 30),
-                
-                Shift(date: tuesday,
-                      startTime: setTime(for: tuesday, hour: 8, minute: 30),
-                      endTime: setTime(for: tuesday, hour: 17),
-                      breakDurationMinutes: 30),
-                
-                Shift(date: saturday,
-                      startTime: setTime(for: saturday, hour: 8, minute: 30),
-                      endTime: setTime(for: saturday, hour: 17),
-                      breakDurationMinutes: 30),
-                
-                // THE MASSIVE DOUBLE SHIFT (The source of the "underpayment")
-                Shift(date: sunday,
-                      startTime: setTime(for: sunday, hour: 8, minute: 0),
-                      endTime: setTime(for: sunday, hour: 20, minute: 30), // 8:30 PM
-                      breakDurationMinutes: 60)
-            ]
+            Shift(date: saturday,
+                  startTime: setTime(for: saturday, hour: 8, minute: 30),
+                  endTime: setTime(for: saturday, hour: 17),
+                  breakDurationMinutes: 30),
             
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                isRosterUploaded = true
-                // Set selected date to the Sunday shift so it's instantly visible
-                selectedDate = sunday
-            }
+            // THE MASSIVE DOUBLE SHIFT (The source of the "underpayment")
+            Shift(date: sunday,
+                  startTime: setTime(for: sunday, hour: 8, minute: 0),
+                  endTime: setTime(for: sunday, hour: 20, minute: 30), // 8:30 PM
+                  breakDurationMinutes: 60)
+        ]
+        
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+            isRosterUploaded = true
+            // Set selected date to the Sunday shift so it's instantly visible
+            selectedDate = sunday
         }
+    }
     
     func updateShift(_ updated: Shift) {
         if let index = shifts.firstIndex(where: { $0.id == updated.id }) {
-            // Check if the date changed (in case we want to support moving shifts across days later)
-            // For now, we update the existing index
             withAnimation {
                 shifts[index] = updated
             }
         }
     }
     
-    // MARK: - Helpers
+    // Logic Helpers
     private func setTime(for date: Date, hour: Int, minute: Int = 0) -> Date {
         Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: date) ?? date
     }
@@ -119,9 +115,8 @@ class RosterViewModel: ObservableObject {
     }
 }
 
-// MARK: - Main View
+// MARK: - 3. MAIN ROSTER VIEW
 struct RosterView: View {
-    
     @StateObject private var viewModel = RosterViewModel()
     
     var body: some View {
@@ -130,7 +125,6 @@ struct RosterView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                
                 // Header
                 HStack {
                     Text("Roster")
@@ -155,7 +149,6 @@ struct RosterView: View {
                 
                 ScrollView {
                     VStack(spacing: 25) {
-                        
                         CalendarCardView(viewModel: viewModel)
                             .padding(.horizontal)
                         
@@ -178,7 +171,7 @@ struct RosterView: View {
                 }
             }
         }
-        // Advanced Bottom Sheet
+        // Bottom Sheet Trigger
         .sheet(item: $viewModel.editingShift) { shift in
             AdvancedShiftEditView(shift: shift) { updated in
                 viewModel.updateShift(updated)
@@ -189,9 +182,8 @@ struct RosterView: View {
     }
 }
 
-// MARK: - Calendar Card
+// MARK: - 4. CALENDAR COMPONENTS
 struct CalendarCardView: View {
-    
     @ObservedObject var viewModel: RosterViewModel
     let calendar = Calendar.current
     @Namespace private var animation
@@ -206,7 +198,6 @@ struct CalendarCardView: View {
                 
                 Spacer()
                 
-                // Week / Month Toggle
                 Picker("View Mode", selection: $viewModel.calendarMode) {
                     ForEach(CalendarMode.allCases, id: \.self) { mode in
                         Text(mode.rawValue).tag(mode)
@@ -216,7 +207,6 @@ struct CalendarCardView: View {
                 .frame(width: 140)
             }
             
-            // Weekday Headers
             HStack {
                 ForEach(calendar.shortWeekdaySymbols, id: \.self) { day in
                     Text(day)
@@ -227,17 +217,13 @@ struct CalendarCardView: View {
                 }
             }
             
-            // Dynamic Grid
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7)) {
-                
                 ForEach(visibleDays(), id: \.self) { date in
                     if let date = date {
                         DayCell(date: date, viewModel: viewModel)
                             .onTapGesture {
                                 withAnimation {
                                     viewModel.selectedDate = date
-                                    
-                                    // If a shift exists, open the sheet
                                     if let shift = viewModel.getShift(on: date) {
                                         viewModel.editingShift = shift
                                     }
@@ -250,7 +236,7 @@ struct CalendarCardView: View {
             }
             .animation(.easeInOut(duration: 0.3), value: viewModel.calendarMode)
             .frame(height: viewModel.calendarMode == .week ? 60 : 280, alignment: .top)
-            .clipped() // Ensure smooth transition cropping
+            .clipped()
         }
         .padding()
         .background(Color.white)
@@ -258,7 +244,6 @@ struct CalendarCardView: View {
         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
     }
     
-    // Subview for Day Cell to keep logic clean
     struct DayCell: View {
         let date: Date
         @ObservedObject var viewModel: RosterViewModel
@@ -274,12 +259,8 @@ struct CalendarCardView: View {
                     .font(.system(size: 16, weight: isSelected ? .bold : .regular))
                     .foregroundColor(isSelected ? .white : .primary)
                     .frame(width: 32, height: 32)
-                    .background(
-                        Circle()
-                            .fill(isSelected ? Color.blue : Color.clear)
-                    )
+                    .background(Circle().fill(isSelected ? Color.blue : Color.clear))
                 
-                // Shift Dot Indicator
                 if viewModel.hasShift(on: date) {
                     Circle()
                         .fill(isSelected ? Color.blue.opacity(0.3) : Color.blue)
@@ -295,13 +276,11 @@ struct CalendarCardView: View {
         }
     }
     
-    // Logic to switch between full month days and just the selected week
+    // Calendar Math
     func visibleDays() -> [Date?] {
         switch viewModel.calendarMode {
-        case .month:
-            return daysInMonth()
-        case .week:
-            return daysInSelectedWeek()
+        case .month: return daysInMonth()
+        case .week: return daysInSelectedWeek()
         }
     }
     
@@ -311,7 +290,7 @@ struct CalendarCardView: View {
         else { return [] }
         
         let firstWeekday = calendar.component(.weekday, from: first)
-        let offset = (firstWeekday + 5) % 7 // Adjust based on locale start day (Assuming Mon start here approx)
+        let offset = (firstWeekday + 5) % 7
         
         var days: [Date?] = Array(repeating: nil, count: offset)
         for i in 0..<range.count {
@@ -323,7 +302,6 @@ struct CalendarCardView: View {
     func daysInSelectedWeek() -> [Date?] {
         guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: viewModel.selectedDate)) else { return [] }
         
-        // Assuming Monday start for consistency with mock data, adjust offset if needed
         var days: [Date?] = []
         for i in 0..<7 {
             days.append(calendar.date(byAdding: .day, value: i, to: startOfWeek))
@@ -332,14 +310,12 @@ struct CalendarCardView: View {
     }
 }
 
-// MARK: - Summary Section
+// MARK: - 5. SUMMARY & LIST COMPONENTS
 struct SummarySection: View {
-    
     @ObservedObject var viewModel: RosterViewModel
     
     var body: some View {
         VStack(spacing: 15) {
-            
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Summary")
@@ -388,7 +364,6 @@ struct SummarySection: View {
     }
 }
 
-// MARK: - Shift Row (Preserved)
 struct ShiftListRow: View {
     let shift: Shift
     var body: some View {
@@ -422,14 +397,13 @@ struct ShiftListRow: View {
     }
 }
 
-// MARK: - Advanced Bottom Sheet
+// MARK: - 6. ADVANCED EDIT SHEET
 struct AdvancedShiftEditView: View {
-    
     @State var shift: Shift
     var onSave: (Shift) -> Void
     @Environment(\.dismiss) var dismiss
     
-    // Local State for Sliders (0.0 - 24.0)
+    // Local State for Sliders
     @State private var startHour: Double = 9.0
     @State private var endHour: Double = 17.0
     @State private var breakDuration: Double = 30.0
@@ -439,20 +413,17 @@ struct AdvancedShiftEditView: View {
             ScrollView {
                 VStack(spacing: 30) {
                     
-                    // 1. Timeline Visualization
                     TimelineView(startHour: startHour, endHour: endHour, breakDuration: breakDuration)
                         .frame(height: 80)
                         .padding(.top, 20)
                     
-                    // 2. Calculated Stats
                     HStack(spacing: 40) {
                         StatView(title: "Duration", value: String(format: "%.1f h", calculateDuration()))
-                        StatView(title: "Earnings", value: "Est. $--") // Placeholder for future feature
+                        StatView(title: "Earnings", value: "Est. $--")
                     }
                     
                     Divider()
                     
-                    // 3. Sliders
                     VStack(spacing: 25) {
                         ControlRow(icon: "clock", title: "Start Time", value: formatTime(hour: startHour)) {
                             Slider(value: $startHour, in: 0...23.9, step: 0.25)
@@ -491,14 +462,12 @@ struct AdvancedShiftEditView: View {
                 }
             }
             .onAppear {
-                // Initialize sliders from passed Shift model
                 loadFromModel()
             }
         }
     }
     
-    // MARK: - Logic
-    
+    // MARK: Logic
     func loadFromModel() {
         let calendar = Calendar.current
         let startComp = calendar.dateComponents([.hour, .minute], from: shift.startTime)
@@ -510,7 +479,6 @@ struct AdvancedShiftEditView: View {
     }
     
     func updateShiftModel() {
-        // Enforce End > Start logic visually
         if endHour < startHour { endHour = startHour }
         
         shift.startTime = dateFromHour(startHour)
@@ -536,8 +504,7 @@ struct AdvancedShiftEditView: View {
     }
 }
 
-// MARK: - Components for Bottom Sheet
-
+// MARK: - 7. CUSTOM UI CONTROLS
 struct TimelineView: View {
     var startHour: Double
     var endHour: Double
@@ -546,12 +513,10 @@ struct TimelineView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                // Background Track (0-24h)
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.gray.opacity(0.15))
                     .frame(height: 40)
                 
-                // Hour Markers
                 HStack(spacing: 0) {
                     ForEach(0..<5) { i in
                         Text("\(i * 6)")
@@ -562,7 +527,6 @@ struct TimelineView: View {
                 }
                 .offset(y: 35)
                 
-                // Working Block (Blue)
                 let widthPerOneHour = geo.size.width / 24.0
                 let startX = startHour * widthPerOneHour
                 let blockWidth = max(0, (endHour - startHour) * widthPerOneHour)
@@ -571,7 +535,6 @@ struct TimelineView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing))
                     
-                    // Break Visualization (Striped or different color overlay)
                     if breakDuration > 0 {
                         let breakWidth = (breakDuration / 60.0) * widthPerOneHour
                         RoundedRectangle(cornerRadius: 4)
@@ -581,7 +544,7 @@ struct TimelineView: View {
                                 Text("Break")
                                     .font(.system(size: 8, weight: .bold))
                                     .foregroundColor(.white)
-                                    .opacity(breakWidth > 30 ? 1 : 0) // Hide text if too small
+                                    .opacity(breakWidth > 30 ? 1 : 0)
                             )
                     }
                 }
@@ -640,9 +603,6 @@ struct StatView: View {
     }
 }
 
-// MARK: - Preview
-struct RosterView_Previews: PreviewProvider {
-    static var previews: some View {
-        RosterView()
-    }
+#Preview {
+    RosterView()
 }

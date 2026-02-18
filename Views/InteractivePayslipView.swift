@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Jargon Data Model (Now supports Highlighting Boxes)
+// MARK: - 1. DATA MODEL
 struct JargonItem: Identifiable {
     let id = UUID()
     let title: String
@@ -12,43 +12,44 @@ struct JargonItem: Identifiable {
     let isError: Bool
 }
 
+// MARK: - 2. MAIN VIEW
 struct InteractivePayslipView: View {
     @Environment(\.dismiss) var dismiss
     @State private var selectedJargon: JargonItem? = nil
     @State private var isPulsing = false
     
-    // MARK: - The Highlighter Hotspots
-    // I have estimated these values based on your screenshot.
-    // Tweak xPct/yPct to move them, and wPct/hPct to stretch them.
-        let hotspots: [JargonItem] = [
-            JargonItem(
-                title: "CAS Normal Time",
-                description: "This is your standard base hourly rate as a Casual worker. It does not include any weekend, public holiday, or late-night penalty rates.",
-                xPct: 0.13, yPct: 0.328, wPct: 0.22, hPct: 0.025, // Moved UP to the top line
-                isError: false
-            ),
-            JargonItem(
-                title: "PAYG Tax",
-                description: "PAYG stands for 'Pay As You Go'. This is the tax your employer automatically deducts from your wage and sends directly to the ATO.",
-                xPct: 0.10, yPct: 0.500, wPct: 0.16, hPct: 0.025, // Moved UP to sit perfectly on the text
-                isError: false
-            ),
-            JargonItem(
-                title: "Superannuation (Host Plus)",
-                description: "Your Super. By law, your employer must pay an additional percentage of your earnings into this fund. It is not deducted from your take-home pay.",
-                xPct: 0.13, yPct: 0.590, wPct: 0.22, hPct: 0.025, // Moved DOWN to clear the black box
-                isError: false
-            ),
-            // THE RED ERROR HOTSPOT
-            JargonItem(
-                title: "Missing Sunday Hours",
-                description: "ERROR FOUND: Your roster shows you worked a 12-hour double shift on Sunday. However, this line item only pays you for 7.6 hours. You are missing 4.4 hours of Double Time pay.",
-                xPct: 0.90, yPct: 0.437, wPct: 0.15, hPct: 0.025, // Moved UP to the SUN CAS Loading amount
-                isError: true
-            )
-        ]
+    // MARK: - 3. HOTSPOT DATA
+    let hotspots: [JargonItem] = [
+        JargonItem(
+            title: "CAS Normal Time",
+            description: "This is your standard base hourly rate as a Casual worker. It does not include any weekend, public holiday, or late-night penalty rates.",
+            xPct: 0.13, yPct: 0.328, wPct: 0.22, hPct: 0.025,
+            isError: false
+        ),
+        JargonItem(
+            title: "PAYG Tax",
+            description: "PAYG stands for 'Pay As You Go'. This is the tax your employer automatically deducts from your wage and sends directly to the ATO.",
+            xPct: 0.10, yPct: 0.500, wPct: 0.16, hPct: 0.025,
+            isError: false
+        ),
+        JargonItem(
+            title: "Superannuation (Host Plus)",
+            description: "Your Super. By law, your employer must pay an additional percentage of your earnings into this fund. It is not deducted from your take-home pay.",
+            xPct: 0.13, yPct: 0.590, wPct: 0.22, hPct: 0.025,
+            isError: false
+        ),
+        // THE RED ERROR HOTSPOT
+        JargonItem(
+            title: "Missing Sunday Hours",
+            description: "ERROR FOUND: Your roster shows you worked a 12-hour double shift on Sunday. However, this line item only pays you for 7.6 hours. You are missing 4.4 hours of Double Time pay.",
+            xPct: 0.90, yPct: 0.437, wPct: 0.15, hPct: 0.025,
+            isError: true
+        )
+    ]
+    
     let darkNavy = Color(red: 0.3, green: 0.28, blue: 0.45)
     
+    // MARK: - 4. MAIN BODY
     var body: some View {
         NavigationStack {
             ZStack {
@@ -63,7 +64,7 @@ struct InteractivePayslipView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                         
-                        // MARK: - The Payslip Canvas
+                        // MARK: The Payslip Canvas
                         Image("payslip_demo")
                             .resizable()
                             .scaledToFit()
@@ -79,20 +80,16 @@ struct InteractivePayslipView: View {
                                                 selectedJargon = item
                                             }) {
                                                 RoundedRectangle(cornerRadius: 6)
-                                                    // Translucent fill so you can read the text
                                                     .fill((item.isError ? Color.red : Color.blue).opacity(isPulsing ? 0.25 : 0.1))
-                                                    // Dashed border makes it look like a document scanner
                                                     .overlay(
                                                         RoundedRectangle(cornerRadius: 6)
                                                             .stroke(item.isError ? Color.red : Color.blue, style: StrokeStyle(lineWidth: 2, dash: [4, 4]))
                                                     )
                                             }
-                                            // Dynamic Width and Height based on the image size
                                             .frame(
                                                 width: geo.size.width * item.wPct,
                                                 height: geo.size.height * item.hPct
                                             )
-                                            // Dynamic Positioning
                                             .position(
                                                 x: geo.size.width * item.xPct,
                                                 y: geo.size.height * item.yPct
@@ -100,7 +97,7 @@ struct InteractivePayslipView: View {
                                         }
                                     }
                                 }
-                                .padding() // Must match the padding of the image
+                                .padding()
                             )
                         
                         Spacer(minLength: 50)
@@ -114,7 +111,7 @@ struct InteractivePayslipView: View {
                     Button("Close") { dismiss() }
                 }
             }
-            // MARK: - The Plain English Bottom Sheet
+            // MARK: The Plain English Bottom Sheet
             .sheet(item: $selectedJargon) { jargon in
                 JargonExplanationSheet(jargon: jargon)
                     .presentationDetents([.fraction(0.4)])
@@ -122,7 +119,6 @@ struct InteractivePayslipView: View {
             }
         }
         .onAppear {
-            // A gentle, infinite pulsing animation to draw the eye to the boxes
             withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
                 isPulsing = true
             }
@@ -130,7 +126,7 @@ struct InteractivePayslipView: View {
     }
 }
 
-// MARK: - Explanation Bottom Sheet
+// MARK: - 5. EXPLANATION SHEET COMPONENT
 struct JargonExplanationSheet: View {
     let jargon: JargonItem
     

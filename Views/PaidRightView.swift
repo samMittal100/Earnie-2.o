@@ -1,15 +1,17 @@
 import SwiftUI
 
 struct PaidRightView: View {
-    // MARK: - Data Parameters
+    // MARK: - 1. DATA PARAMETERS
     let totalEarnings: Double
     let tax: Double
     let superAmount: Double
     let takeHome: Double
 
+    // MARK: - 2. CUSTOM COLORS
     let primaryBlue = Color(red: 0.58, green: 0.69, blue: 0.95)
     let textColor = Color(red: 0.35, green: 0.35, blue: 0.45)
     
+    // MARK: - 3. NAVIGATION STATE
     @State private var selectedTab: Tab = .upload
     @State private var shouldRedirect = false
     
@@ -18,8 +20,10 @@ struct PaidRightView: View {
         case archive
     }
     
+    // MARK: - 4. MAIN BODY
     var body: some View {
         ZStack {
+            // MARK: Routing Logic
             if shouldRedirect {
                 AnalysisPaidView(
                     totalEarnings: totalEarnings,
@@ -32,6 +36,7 @@ struct PaidRightView: View {
                 splashContent.transition(.opacity)
             }
         }
+        // MARK: Auto-Redirect Timer
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 withAnimation(.easeInOut(duration: 0.8)) {
@@ -41,11 +46,14 @@ struct PaidRightView: View {
         }
     }
     
+    // MARK: - 5. SPLASH SCREEN CONTENT
     var splashContent: some View {
         ZStack {
             primaryBlue.opacity(0.2).ignoresSafeArea()
             VStack {
                 Spacer()
+                
+                // MARK: Left Mascot
                 HStack {
                     Image("characterLeft")
                         .resizable()
@@ -54,13 +62,19 @@ struct PaidRightView: View {
                         .offset(x: -30, y: 20)
                     Spacer()
                 }
+                
                 Spacer()
+                
+                // MARK: Center Text
                 VStack(spacing: 10) {
                     Text(" YOU HAVE BEEN").font(.system(size: 34, weight: .medium)).foregroundColor(.pink)
                     Text("PAID RIGHT!!").font(.system(size: 40, weight: .bold)).foregroundColor(.pink).offset(x: 10, y: -7)
                     Text("🎉").font(.system(size: 42, weight: .bold)).foregroundColor(.pink).offset(x: 10, y: -7)
                 }
+                
                 Spacer()
+                
+                // MARK: Right Mascot
                 HStack {
                     Spacer()
                     Image("characterRight")
@@ -69,12 +83,16 @@ struct PaidRightView: View {
                         .frame(width: 160)
                         .offset(x: 10, y: 20)
                 }
+                
                 Spacer()
-                glassTabBar.padding(.horizontal, 24).padding(.bottom, 30)
+                
+                // 🔴 THE FIX: Commented out to prevent double-stacking tab bars!
+                // glassTabBar.padding(.horizontal, 24).padding(.bottom, 30)
             }
         }
     }
     
+    // MARK: - 6. UNUSED TAB BAR COMPONENTS (HIDDEN)
     var glassTabBar: some View {
         HStack(spacing: 20) {
             footerButton(label: "Upload", icon: "square.and.arrow.up", color: .black)
