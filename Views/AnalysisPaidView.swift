@@ -2,24 +2,25 @@ import SwiftUI
 import Charts
 
 struct AnalysisPaidView: View {
+    // MARK: - 1. DATA PARAMETERS
     let totalEarnings: Double
-        let tax: Double
-        let superAmount: Double
-        let takeHome: Double
+    let tax: Double
+    let superAmount: Double
+    let takeHome: Double
     
-    // MARK: - State
+    // MARK: - 2. UI STATE & ANIMATIONS
     @State private var displayedAmount: Double = 0
     @State private var animateChart = false
     @State private var animateCard = false
     @State private var selectedCategory: String? = nil
     
-    // MARK: - Custom Colors
+    // MARK: - 3. CUSTOM COLORS
     let darkNavy = Color(red: 0.3, green: 0.28, blue: 0.45)
     let chartBlue = Color(red: 0.54, green: 0.62, blue: 0.93)
     let chartPurple = Color(red: 0.68, green: 0.48, blue: 0.78)
     let taxOrange = Color.orange
     
-    // MARK: - Data Model
+    // MARK: - 4. CHART DATA MODELS
     struct PayslipItem: Identifiable {
         var id: String { category }
         let category: String
@@ -39,13 +40,18 @@ struct AnalysisPaidView: View {
         chartData.reduce(0) { $0 + $1.amount }
     }
     
+    // MARK: - 5. MAIN BODY
     var body: some View {
         ZStack(alignment: .bottom) {
+            
+            // MARK: Background Layer
             Color.white.ignoresSafeArea()
             
+            // MARK: Scrollable Content
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
-                    // MARK: Header
+                    
+                    // MARK: Top Header
                     HStack(spacing: 10) {
                         Image(systemName: "chart.pie.fill")
                             .font(.system(size: 28))
@@ -126,7 +132,7 @@ struct AnalysisPaidView: View {
                         animateNumber()
                     }
                     
-                    // MARK: Breakdown Card
+                    // MARK: Mathematical Breakdown Card
                     VStack(spacing: 18) {
                         row(title: "Total Before Tax Pay", value: totalEarnings, color: darkNavy, isHighlighted: false)
                         
@@ -168,6 +174,8 @@ struct AnalysisPaidView: View {
                 withAnimation(.spring()) { selectedCategory = nil }
             }
             
+            // 🔴 THE FIX: Duplicate Footer commented out so it doesn't overlap with ContentView 🔴
+            /*
             // MARK: Footer
             VStack(spacing: 18) {
                 HStack(spacing: 5) {
@@ -182,11 +190,13 @@ struct AnalysisPaidView: View {
                 .padding(.horizontal, 20)
             }
             .padding(.bottom, 10)
+            */
         }
     }
     
-    // MARK: - FUNCTIONS
+    // MARK: - 6. HELPER FUNCTIONS
     
+    // Calculates which slice of the pie chart was tapped
     func handleTap(location: CGPoint, in geometry: GeometryProxy) {
         let radius = min(geometry.size.width, geometry.size.height) / 2
         let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
@@ -213,6 +223,7 @@ struct AnalysisPaidView: View {
         }
     }
 
+    // Triggers pie chart highlight
     func selectCategory(_ category: String) {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
@@ -220,6 +231,7 @@ struct AnalysisPaidView: View {
         }
     }
     
+    // Generates the rows for the breakdown card
     func row(title: String, value: Double, color: Color, bold: Bool = false, isHighlighted: Bool) -> some View {
         HStack {
             Text(title).font(.system(size: 16)).fontWeight(bold ? .bold : .medium).foregroundColor(darkNavy)
@@ -230,6 +242,18 @@ struct AnalysisPaidView: View {
         .background(RoundedRectangle(cornerRadius: 8).fill(isHighlighted ? color.opacity(0.15) : Color.clear))
     }
 
+    // Number counting up effect
+    func animateNumber() {
+        displayedAmount = 0
+        let steps = 60
+        for i in 0...steps {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (1.5 / Double(steps)) * Double(i)) {
+                displayedAmount = min(takeHome, (takeHome / Double(steps)) * Double(i))
+            }
+        }
+    }
+
+    // (Footer logic kept for reference, but UI is commented out above)
     func footerButton(label: String, icon: String, color: Color) -> some View {
         Button(action: {}) {
             VStack(spacing: 6) {
@@ -250,17 +274,8 @@ struct AnalysisPaidView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 5, y: 5)
         }
     }
-
-    func animateNumber() {
-        displayedAmount = 0
-        let steps = 60
-        for i in 0...steps {
-            DispatchQueue.main.asyncAfter(deadline: .now() + (1.5 / Double(steps)) * Double(i)) {
-                displayedAmount = min(takeHome, (takeHome / Double(steps)) * Double(i))
-            }
-        }
-    }
 }
+
 #Preview {
     AnalysisPaidView(
         totalEarnings: 565,

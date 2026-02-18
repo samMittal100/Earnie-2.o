@@ -8,6 +8,7 @@ struct UnderpaidView: View {
     let superAmount: Double
     let takeHome: Double
 
+    // MARK: - Custom Colors
     let primaryBlue = Color(red: 0.58, green: 0.69, blue: 0.95)
     let textColor = Color(red: 0.35, green: 0.35, blue: 0.45)
     
@@ -20,10 +21,11 @@ struct UnderpaidView: View {
         case archive
     }
     
+    // MARK: - Main Body
     var body: some View {
         ZStack {
+            // MARK: Routing Logic
             if shouldRedirect {
-                // Hand the data off to the chart view
                 AnalysisUnderpaidInsightView(
                     totalBeforeTax: totalBeforeTax,
                     underpaidAmount: underpaidAmount,
@@ -31,12 +33,13 @@ struct UnderpaidView: View {
                     superAmount: superAmount,
                     takeHome: takeHome
                 )
-                .transition(.opacity) // Smooth fade transition
+                .transition(.opacity)
             } else {
                 underpaidSplashContent
                     .transition(.opacity)
             }
         }
+        // MARK: Auto-Redirect Timer
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 withAnimation(.easeInOut(duration: 0.8)) {
@@ -46,11 +49,15 @@ struct UnderpaidView: View {
         }
     }
     
+    // MARK: - Splash Screen Content
     var underpaidSplashContent: some View {
         ZStack {
             primaryBlue.opacity(0.2).ignoresSafeArea()
+            
             VStack {
                 Spacer()
+                
+                // MARK: Left Mascot
                 HStack {
                     Image("characterLeft")
                         .resizable()
@@ -59,13 +66,19 @@ struct UnderpaidView: View {
                         .offset(x: -30, y: 20)
                     Spacer()
                 }
+                
                 Spacer()
+                
+                // MARK: Center Warning Text
                 VStack(spacing: 10) {
                     Text("You are").font(.system(size: 34, weight: .medium)).foregroundColor(.pink)
                     Text("Underpaid!!").font(.system(size: 40, weight: .bold)).foregroundColor(.pink)
                     Text("$\(Int(underpaidAmount))").font(.system(size: 42, weight: .bold)).foregroundColor(.pink)
                 }
+                
                 Spacer()
+                
+                // MARK: Right Mascot
                 HStack {
                     Spacer()
                     Image("characterRight")
@@ -74,12 +87,17 @@ struct UnderpaidView: View {
                         .frame(width: 160)
                         .offset(x: 10, y: 20)
                 }
+                
                 Spacer()
-                glassTabBar.padding(.horizontal, 24).padding(.bottom, 30)
+                
+                // 🔴 THE FIX: Commented out to prevent double-stacking tab bars!
+                // glassTabBar.padding(.horizontal, 24).padding(.bottom, 30)
             }
         }
     }
     
+    // MARK: - Unused Tab Bar Components (Hidden)
+    // Kept in the file so you don't lose the code, but hidden from the UI
     var glassTabBar: some View {
         HStack(spacing: 0) {
             tabButton(title: "Upload", icon: "square.and.arrow.up", tab: .upload)
@@ -121,14 +139,4 @@ struct UnderpaidView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-}
-
-#Preview {
-    UnderpaidView(
-        totalBeforeTax: 565,
-        underpaidAmount: 106,
-        tax: 56,
-        superAmount: 61,
-        takeHome: 435
-    )
 }

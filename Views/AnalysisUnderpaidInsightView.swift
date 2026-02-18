@@ -2,20 +2,20 @@ import SwiftUI
 import Charts
 
 struct AnalysisUnderpaidInsightView: View {
-    // MARK: - Payslip Data
+    // MARK: - 1. DATA PARAMETERS
     let totalBeforeTax: Double
     let underpaidAmount: Double
     let tax: Double
     let superAmount: Double
     let takeHome: Double
     
-    // MARK: - State for Animations & Sheets
+    // MARK: - 2. UI STATE & ANIMATIONS
     @State private var displayedAmount: Double = 0
     @State private var animateChart = false
     @State private var selectedCategory: String? = nil
     @State private var showInteractivePayslip = false // Triggers the Jargon Buster sheet
     
-    // MARK: - Custom Colors
+    // MARK: - 3. CUSTOM COLORS
     let darkNavy = Color(red: 0.3, green: 0.28, blue: 0.45)
     let underpaidRed = Color(red: 0.95, green: 0.3, blue: 0.3)
     let chartBlue = Color(red: 0.54, green: 0.62, blue: 0.93)
@@ -23,6 +23,7 @@ struct AnalysisUnderpaidInsightView: View {
     let taxOrange = Color.orange
     let warningPurple = Color(red: 0.38, green: 0.35, blue: 0.49)
 
+    // MARK: - 4. CHART DATA MODELS
     struct PayslipItem: Identifiable {
         var id: String { category }
         let category: String
@@ -43,10 +44,11 @@ struct AnalysisUnderpaidInsightView: View {
         chartData.reduce(0) { $0 + $1.amount }
     }
     
+    // MARK: - 5. MAIN BODY
     var body: some View {
         ZStack(alignment: .bottom) {
             
-            // MARK: - BACKGROUND LAYER
+            // MARK: Background Layer
             Color(red: 0.96, green: 0.97, blue: 1.0)
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
@@ -54,10 +56,11 @@ struct AnalysisUnderpaidInsightView: View {
                     withAnimation(.spring()) { selectedCategory = nil }
                 }
             
-            // MARK: - SCROLLABLE CONTENT
+            // MARK: Scrollable Content
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 25) {
-                    // MARK: Header
+                    
+                    // MARK: Top Header
                     HStack {
                         Image(systemName: "chart.pie.fill")
                             .font(.system(size: 28))
@@ -80,7 +83,7 @@ struct AnalysisUnderpaidInsightView: View {
                             .foregroundColor(.gray)
                     }
                     
-                    // MARK: Underpaid Banner
+                    // MARK: Red Underpaid Banner
                     HStack {
                         Image(systemName: "exclamationmark.triangle")
                         Text("Underpaid")
@@ -121,6 +124,7 @@ struct AnalysisUnderpaidInsightView: View {
                             }
                         }
                         
+                        // Center Text of Pie Chart
                         VStack {
                             if let selected = selectedCategory,
                                let item = chartData.first(where: { $0.category == selected }) {
@@ -144,9 +148,9 @@ struct AnalysisUnderpaidInsightView: View {
                     }
                     .onAppear { withAnimation(.easeInOut(duration: 1.0)) { animateChart = true } }
                     
-                    // MARK: - EARNIE's INSIGHT (THE ACCESSIBILITY UPGRADE)
+                    // MARK: Earnie's Insight (Accessibility Upgrade)
                     HStack(alignment: .top, spacing: 15) {
-                        Image("earnieMascot2") // Ensure this exactly matches your asset name
+                        Image("earnieMascot2")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 45)
@@ -159,7 +163,6 @@ struct AnalysisUnderpaidInsightView: View {
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(darkNavy)
                             
-                            // Purely informational, translating math to English
                             Text("Your employer paid you for standard hours on Sunday. Based on your roster, you worked a 12-hour shift and are missing your Sunday Double Time penalty rates.")
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(.gray)
@@ -173,7 +176,7 @@ struct AnalysisUnderpaidInsightView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 5)
                     
-                    // MARK: - Breakdown Rows
+                    // MARK: Mathematical Breakdown Rows
                     VStack(spacing: 15) {
                         row(title: "Total Before Tax Pay", value: totalBeforeTax, color: .black, isHighlighted: false)
                         
@@ -205,15 +208,18 @@ struct AnalysisUnderpaidInsightView: View {
                     .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
                     
-                    // 🔴 MARK: - THE JARGON BUSTER LINK 🔴
+                    // MARK: The Jargon Buster Link
                     infoLinkSection
                     
+                    // MARK: Contacts Section
                     contactsSection
+                    
                     Spacer(minLength: 120)
                 }
             }
             
-            // MARK: - FOOTER
+            // 🔴 THE FIX: Duplicate Footer commented out so it doesn't overlap with ContentView
+            /*
             VStack(spacing: 18) {
                 HStack(spacing: 5) {
                     Text("Scroll down for more info").font(.subheadline).foregroundColor(.blue)
@@ -222,11 +228,14 @@ struct AnalysisUnderpaidInsightView: View {
                 footerButtons
             }
             .padding(.bottom, 10)
+            */
         }
         .onAppear { animateNumber() }
     }
 
-    // MARK: - Helper Functions
+    // MARK: - 6. HELPER FUNCTIONS
+    
+    // Generates the rows for the breakdown card
     func row(title: String, value: Double, color: Color, isBold: Bool = false, isUnderpaidRow: Bool = false, isHighlighted: Bool) -> some View {
         HStack {
             Text(title).font(.system(size: 15, weight: isBold ? .bold : .medium))
@@ -240,12 +249,14 @@ struct AnalysisUnderpaidInsightView: View {
         .cornerRadius(8)
     }
 
+    // Triggers pie chart highlight
     func selectCategory(_ category: String) {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
             selectedCategory = (selectedCategory == category) ? nil : category
         }
     }
 
+    // Calculates which slice of the pie chart was tapped
     func handleTap(location: CGPoint, in geometry: GeometryProxy) {
         let radius = min(geometry.size.width, geometry.size.height) / 2
         let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
@@ -268,7 +279,7 @@ struct AnalysisUnderpaidInsightView: View {
         }
     }
 
-    // 🔴 NEW: The Interactive Payslip Button 🔴
+    // Interactive Payslip Button
     var infoLinkSection: some View {
         Button(action: {
             showInteractivePayslip = true
@@ -289,11 +300,11 @@ struct AnalysisUnderpaidInsightView: View {
         .padding(.horizontal)
         .foregroundColor(.black)
         .sheet(isPresented: $showInteractivePayslip) {
-            // This calls the InteractivePayslipView.swift file
             InteractivePayslipView()
         }
     }
 
+    // ATO & Fair Work Contacts
     var contactsSection: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Contacts").font(.title2).bold().padding(.horizontal)
@@ -306,11 +317,13 @@ struct AnalysisUnderpaidInsightView: View {
         }
     }
 
+    // Number counting up effect
     func animateNumber() {
         displayedAmount = 0
         withAnimation(.linear(duration: 1.0)) { displayedAmount = takeHome }
     }
     
+    // (Footer logic kept for reference, but UI is commented out above)
     var footerButtons: some View {
         HStack(spacing: 20) {
             footerButton(label: "Upload", icon: "square.and.arrow.up", color: .black)
@@ -333,9 +346,6 @@ struct AnalysisUnderpaidInsightView: View {
             .shadow(color: Color.black.opacity(0.1), radius: 10, x: 5, y: 5)
     }
 }
-
-// Ensure ContactCard is only declared ONCE in your project.
-// If it's already in your other file, delete it from here to avoid "Invalid redeclaration" errors.
 
 #Preview {
     AnalysisUnderpaidInsightView(
