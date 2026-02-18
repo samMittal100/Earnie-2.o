@@ -19,6 +19,7 @@
 		BC1A6A402F44D90C004C7B6A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A6A3F2F44D901004C7B6A /* OnboardingView.swift */; };
 		BCC35E172F450CCC00B5DFCF /* UnderpaidView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC35E162F4508BA00B5DFCF /* UnderpaidView.swift */; };
 		BCC35E192F45116B00B5DFCF /* PaidRightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC35E182F4510E400B5DFCF /* PaidRightView.swift */; };
+		BCC35ED52F457FFE00B5DFCF /* RosterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC35ED42F457E3200B5DFCF /* RosterView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		BCC35E162F4508BA00B5DFCF /* UnderpaidView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnderpaidView.swift; sourceTree = "<group>"; };
 		BCC35E182F4510E400B5DFCF /* PaidRightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaidRightView.swift; sourceTree = "<group>"; };
 		BCC35E1A2F45178000B5DFCF /* AnalysisResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisResultView.swift; sourceTree = "<group>"; };
+		BCC35ED42F457E3200B5DFCF /* RosterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RosterView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -88,6 +90,7 @@
 				BC1A6A3D2F448F9F004C7B6A /* AnalysisUnderpaidView.swift */,
 				BCC35E162F4508BA00B5DFCF /* UnderpaidView.swift */,
 				BCC35E182F4510E400B5DFCF /* PaidRightView.swift */,
+				BCC35ED42F457E3200B5DFCF /* RosterView.swift */,
 				BC1A6A3F2F44D901004C7B6A /* OnboardingView.swift */,
 				22938B762F42FBE400322AD7 /* HomeView.swift */,
 				22938B672F42F4C000322AD7 /* ContentView.swift */,
@@ -188,6 +191,7 @@
 				22938B7B2F42FC0500322AD7 /* ArchiveView.swift in Sources */,
 				22938B682F42F4C000322AD7 /* ContentView.swift in Sources */,
 				22938B662F42F4C000322AD7 /* EarnieApp.swift in Sources */,
+				BCC35ED52F457FFE00B5DFCF /* RosterView.swift in Sources */,
 				BC1A6A402F44D90C004C7B6A /* OnboardingView.swift in Sources */,
 				BCC35E192F45116B00B5DFCF /* PaidRightView.swift in Sources */,
 			);
