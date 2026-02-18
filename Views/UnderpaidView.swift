@@ -24,7 +24,7 @@ struct UnderpaidView: View {
         ZStack {
             if shouldRedirect {
                 // Hand the data off to the chart view
-                AnalysisUnderpaidView(
+                AnalysisUnderpaidInsightView(
                     totalBeforeTax: totalBeforeTax,
                     underpaidAmount: underpaidAmount,
                     tax: tax,

@@ -15,6 +15,8 @@
 		22938B7B2F42FC0500322AD7 /* ArchiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22938B7A2F42FBFF00322AD7 /* ArchiveView.swift */; };
 		22938B7F2F43012900322AD7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22938B7E2F43012900322AD7 /* Assets.xcassets */; };
 		22938B882F43420F00322AD7 /* Payslip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22938B752F42FBD000322AD7 /* Payslip.swift */; };
+		22CE823A2F4600640021DC6E /* AnalysisUnderpaidInsightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22CE82392F4600610021DC6E /* AnalysisUnderpaidInsightView.swift */; };
+		22CE823C2F46024E0021DC6E /* InteractivePayslipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22CE823B2F46024D0021DC6E /* InteractivePayslipView.swift */; };
 		22EC22172F455DE2009C518A /* Roster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EC22162F455DDF009C518A /* Roster.swift */; };
 		BC1A6A3E2F448FB5004C7B6A /* AnalysisUnderpaidView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A6A3D2F448F9F004C7B6A /* AnalysisUnderpaidView.swift */; };
 		BC1A6A402F44D90C004C7B6A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A6A3F2F44D901004C7B6A /* OnboardingView.swift */; };
@@ -31,6 +33,8 @@
 		22938B782F42FBF200322AD7 /* AnalysisPaidView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisPaidView.swift; sourceTree = "<group>"; };
 		22938B7A2F42FBFF00322AD7 /* ArchiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchiveView.swift; sourceTree = "<group>"; };
 		22938B7E2F43012900322AD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		22CE82392F4600610021DC6E /* AnalysisUnderpaidInsightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisUnderpaidInsightView.swift; sourceTree = "<group>"; };
+		22CE823B2F46024D0021DC6E /* InteractivePayslipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractivePayslipView.swift; sourceTree = "<group>"; };
 		22EC22162F455DDF009C518A /* Roster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Roster.swift; sourceTree = "<group>"; };
 		22EC22252F4564AC009C518A /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		BC1A6A342F441567004C7B6A /* Earnie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Earnie.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -84,6 +88,8 @@
 		22938B732F42FAEC00322AD7 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				22CE823B2F46024D0021DC6E /* InteractivePayslipView.swift */,
+				22CE82392F4600610021DC6E /* AnalysisUnderpaidInsightView.swift */,
 				22938B912F434E6900322AD7 /* Components */,
 				22938B7A2F42FBFF00322AD7 /* ArchiveView.swift */,
 				BCC35E1A2F45178000B5DFCF /* AnalysisResultView.swift */,
@@ -186,7 +192,9 @@
 				22938B792F42FBF600322AD7 /* AnalysisPaidView.swift in Sources */,
 				22938B772F42FBEA00322AD7 /* HomeView.swift in Sources */,
 				22EC22172F455DE2009C518A /* Roster.swift in Sources */,
+				22CE823A2F4600640021DC6E /* AnalysisUnderpaidInsightView.swift in Sources */,
 				BC1A6A3E2F448FB5004C7B6A /* AnalysisUnderpaidView.swift in Sources */,
+				22CE823C2F46024E0021DC6E /* InteractivePayslipView.swift in Sources */,
 				BCC35E172F450CCC00B5DFCF /* UnderpaidView.swift in Sources */,
 				22938B882F43420F00322AD7 /* Payslip.swift in Sources */,
 				22938B7B2F42FC0500322AD7 /* ArchiveView.swift in Sources */,
