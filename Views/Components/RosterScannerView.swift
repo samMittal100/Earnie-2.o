@@ -8,6 +8,9 @@ struct RosterScannerView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) var dismiss
     
+    // 🔴 NEW: Tells HomeView we finished saving 🔴
+    var onSave: (() -> Void)? = nil
+    
     // UI State
     @State private var selectedItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
@@ -87,9 +90,9 @@ struct RosterScannerView: View {
                             ForEach(weeklyShifts) { day in
                                 HStack {
                                     VStack(alignment: .leading) {
-                                        Text(day.dayName) // e.g. "Monday"
+                                        Text(day.dayName)
                                             .font(.headline)
-                                        Text(day.calculatedDateString) // e.g. "5 Feb"
+                                        Text(day.calculatedDateString)
                                             .font(.caption).foregroundColor(.gray)
                                     }
                                     Spacer()
@@ -144,7 +147,6 @@ struct RosterScannerView: View {
     // MARK: - 3. SAVE LOGIC
     func saveRoster() {
         for shift in weeklyShifts {
-            // We use the 'targetName' as the employer name loosely
             let newRoster = Roster(
                 employerName: "Work",
                 shiftDate: shift.fullDate,
@@ -154,7 +156,10 @@ struct RosterScannerView: View {
             )
             modelContext.insert(newRoster)
         }
+        
         dismiss()
+        // 🔴 NEW: Trigger the navigation transition in HomeView
+        onSave?()
     }
     
     // MARK: - 4. OCR GRID ENGINE

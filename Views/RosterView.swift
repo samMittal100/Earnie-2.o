@@ -37,40 +37,21 @@ class RosterViewModel: ObservableObject {
         let calendar = Calendar.current
         let today = Date()
         
-        // Ensure we work with the current week relative to today for the mock
         guard let monday = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)),
               let tuesday = calendar.date(byAdding: .day, value: 1, to: monday),
               let saturday = calendar.date(byAdding: .day, value: 5, to: monday),
               let sunday = calendar.date(byAdding: .day, value: 6, to: monday)
         else { return }
         
-        // FAKE DATA ALIGNED WITH THE DEMO STORY
         shifts = [
-            Shift(date: monday,
-                  startTime: setTime(for: monday, hour: 8, minute: 30),
-                  endTime: setTime(for: monday, hour: 17),
-                  breakDurationMinutes: 30),
-            
-            Shift(date: tuesday,
-                  startTime: setTime(for: tuesday, hour: 8, minute: 30),
-                  endTime: setTime(for: tuesday, hour: 17),
-                  breakDurationMinutes: 30),
-            
-            Shift(date: saturday,
-                  startTime: setTime(for: saturday, hour: 8, minute: 30),
-                  endTime: setTime(for: saturday, hour: 17),
-                  breakDurationMinutes: 30),
-            
-            // THE MASSIVE DOUBLE SHIFT (The source of the "underpayment")
-            Shift(date: sunday,
-                  startTime: setTime(for: sunday, hour: 8, minute: 0),
-                  endTime: setTime(for: sunday, hour: 20, minute: 30), // 8:30 PM
-                  breakDurationMinutes: 60)
+            Shift(date: monday, startTime: setTime(for: monday, hour: 8, minute: 30), endTime: setTime(for: monday, hour: 17), breakDurationMinutes: 30),
+            Shift(date: tuesday, startTime: setTime(for: tuesday, hour: 8, minute: 30), endTime: setTime(for: tuesday, hour: 17), breakDurationMinutes: 30),
+            Shift(date: saturday, startTime: setTime(for: saturday, hour: 8, minute: 30), endTime: setTime(for: saturday, hour: 17), breakDurationMinutes: 30),
+            Shift(date: sunday, startTime: setTime(for: sunday, hour: 8, minute: 0), endTime: setTime(for: sunday, hour: 20, minute: 30), breakDurationMinutes: 60)
         ]
         
         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
             isRosterUploaded = true
-            // Set selected date to the Sunday shift so it's instantly visible
             selectedDate = sunday
         }
     }
@@ -83,21 +64,15 @@ class RosterViewModel: ObservableObject {
         }
     }
     
-    // Logic Helpers
     private func setTime(for date: Date, hour: Int, minute: Int = 0) -> Date {
         Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: date) ?? date
     }
     
     func shiftsForWeek(of date: Date) -> [Shift] {
         let calendar = Calendar.current
-        
         guard let start = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)),
-              let end = calendar.date(byAdding: .day, value: 7, to: start)
-        else { return [] }
-        
-        return shifts
-            .filter { $0.date >= start && $0.date < end }
-            .sorted { $0.date < $1.date }
+              let end = calendar.date(byAdding: .day, value: 7, to: start) else { return [] }
+        return shifts.filter { $0.date >= start && $0.date < end }.sorted { $0.date < $1.date }
     }
     
     func totalHoursForWeek(of date: Date) -> Double {
@@ -105,24 +80,23 @@ class RosterViewModel: ObservableObject {
     }
     
     func hasShift(on date: Date) -> Bool {
-        let calendar = Calendar.current
-        return shifts.contains { calendar.isDate($0.date, inSameDayAs: date) }
-    }
+            shifts.contains { Calendar.current.isDate($0.date, inSameDayAs: date) }
+        }
     
     func getShift(on date: Date) -> Shift? {
-        let calendar = Calendar.current
-        return shifts.first { calendar.isDate($0.date, inSameDayAs: date) }
+        shifts.first { Calendar.current.isDate($0.date, inSameDayAs: date) }
     }
 }
 
 // MARK: - 3. MAIN ROSTER VIEW
 struct RosterView: View {
     @StateObject private var viewModel = RosterViewModel()
+    // 🔴 NEW: This allows us to dismiss the view and return to Home
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        ZStack {
-            Color(red: 0.96, green: 0.96, blue: 0.98)
-                .ignoresSafeArea()
+        ZStack(alignment: .bottom) { // 🔴 Aligned to bottom to lock the button down
+            Color(red: 0.96, green: 0.96, blue: 0.98).ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Header
@@ -167,8 +141,38 @@ struct RosterView: View {
                             .frame(height: 200)
                         }
                     }
-                    .padding(.bottom, 30)
+                    // Add bottom padding so it doesn't get covered by the sticky button
+                    .padding(.bottom, 100)
                 }
+            }
+            
+            // 🔴 NEW: The Sticky "Confirm & Return" Button 🔴
+            VStack {
+                Spacer()
+                Button(action: {
+                    dismiss() // Sends user back to HomeView
+                }) {
+                    Text("Confirm Roster")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.blue)
+                        .cornerRadius(16)
+                        .shadow(color: Color.blue.opacity(0.3), radius: 10, y: 5)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 20)
+                // Gentle gradient background to blend it over the scrollview
+                .background(
+                    LinearGradient(
+                        colors: [Color(red: 0.96, green: 0.96, blue: 0.98).opacity(0.0), Color(red: 0.96, green: 0.96, blue: 0.98)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 100)
+                    .offset(y: 10)
+                )
             }
         }
         // Bottom Sheet Trigger
@@ -186,18 +190,14 @@ struct RosterView: View {
 struct CalendarCardView: View {
     @ObservedObject var viewModel: RosterViewModel
     let calendar = Calendar.current
-    @Namespace private var animation
     
     var body: some View {
         VStack(spacing: 15) {
-            
             HStack {
                 Text(viewModel.currentMonth.formatted(.dateTime.month(.wide).year()))
                     .font(.headline)
                     .foregroundColor(.primary)
-                
                 Spacer()
-                
                 Picker("View Mode", selection: $viewModel.calendarMode) {
                     ForEach(CalendarMode.allCases, id: \.self) { mode in
                         Text(mode.rawValue).tag(mode)
@@ -209,11 +209,7 @@ struct CalendarCardView: View {
             
             HStack {
                 ForEach(calendar.shortWeekdaySymbols, id: \.self) { day in
-                    Text(day)
-                        .font(.caption)
-                        .fontWeight(.bold)
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity)
+                    Text(day).font(.caption).fontWeight(.bold).foregroundColor(.gray).frame(maxWidth: .infinity)
                 }
             }
             
@@ -249,9 +245,7 @@ struct CalendarCardView: View {
         @ObservedObject var viewModel: RosterViewModel
         let calendar = Calendar.current
         
-        var isSelected: Bool {
-            calendar.isDate(date, inSameDayAs: viewModel.selectedDate)
-        }
+        var isSelected: Bool { calendar.isDate(date, inSameDayAs: viewModel.selectedDate) }
         
         var body: some View {
             VStack(spacing: 4) {
@@ -262,21 +256,15 @@ struct CalendarCardView: View {
                     .background(Circle().fill(isSelected ? Color.blue : Color.clear))
                 
                 if viewModel.hasShift(on: date) {
-                    Circle()
-                        .fill(isSelected ? Color.blue.opacity(0.3) : Color.blue)
-                        .frame(width: 5, height: 5)
-                        .transition(.scale)
+                    Circle().fill(isSelected ? Color.blue.opacity(0.3) : Color.blue).frame(width: 5, height: 5).transition(.scale)
                 } else {
-                    Circle()
-                        .fill(Color.clear)
-                        .frame(width: 5, height: 5)
+                    Circle().fill(Color.clear).frame(width: 5, height: 5)
                 }
             }
             .frame(height: 45)
         }
     }
     
-    // Calendar Math
     func visibleDays() -> [Date?] {
         switch viewModel.calendarMode {
         case .month: return daysInMonth()
@@ -286,26 +274,17 @@ struct CalendarCardView: View {
     
     func daysInMonth() -> [Date?] {
         guard let range = calendar.range(of: .day, in: .month, for: viewModel.currentMonth),
-              let first = calendar.date(from: calendar.dateComponents([.year, .month], from: viewModel.currentMonth))
-        else { return [] }
-        
-        let firstWeekday = calendar.component(.weekday, from: first)
-        let offset = (firstWeekday + 5) % 7
-        
+              let first = calendar.date(from: calendar.dateComponents([.year, .month], from: viewModel.currentMonth)) else { return [] }
+        let offset = (calendar.component(.weekday, from: first) + 5) % 7
         var days: [Date?] = Array(repeating: nil, count: offset)
-        for i in 0..<range.count {
-            days.append(calendar.date(byAdding: .day, value: i, to: first))
-        }
+        for i in 0..<range.count { days.append(calendar.date(byAdding: .day, value: i, to: first)) }
         return days
     }
     
     func daysInSelectedWeek() -> [Date?] {
         guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: viewModel.selectedDate)) else { return [] }
-        
         var days: [Date?] = []
-        for i in 0..<7 {
-            days.append(calendar.date(byAdding: .day, value: i, to: startOfWeek))
-        }
+        for i in 0..<7 { days.append(calendar.date(byAdding: .day, value: i, to: startOfWeek)) }
         return days
     }
 }
@@ -318,40 +297,22 @@ struct SummarySection: View {
         VStack(spacing: 15) {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Summary")
-                        .font(.title2)
-                        .bold()
-                        .foregroundColor(Color(red: 0.3, green: 0.25, blue: 0.4))
-                    
-                    Text("This Week")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                    Text("Summary").font(.title2).bold().foregroundColor(Color(red: 0.3, green: 0.25, blue: 0.4))
+                    Text("This Week").font(.subheadline).foregroundColor(.gray)
                 }
-                
                 Spacer()
-                
                 Text(String(format: "%.1f hrs", viewModel.totalHoursForWeek(of: viewModel.selectedDate)))
-                    .font(.title)
-                    .bold()
-                    .foregroundColor(.blue)
-                    .contentTransition(.numericText())
+                    .font(.title).bold().foregroundColor(.blue).contentTransition(.numericText())
             }
             .padding(.bottom, 5)
             
             VStack(spacing: 12) {
                 let shifts = viewModel.shiftsForWeek(of: viewModel.selectedDate)
-                
                 if shifts.isEmpty {
-                    Text("No shifts this week")
-                        .foregroundColor(.gray)
-                        .padding()
+                    Text("No shifts this week").foregroundColor(.gray).padding()
                 } else {
                     ForEach(shifts) { shift in
-                        Button {
-                            viewModel.editingShift = shift
-                        } label: {
-                            ShiftListRow(shift: shift)
-                        }
+                        Button { viewModel.editingShift = shift } label: { ShiftListRow(shift: shift) }
                     }
                 }
             }
@@ -368,28 +329,16 @@ struct ShiftListRow: View {
     let shift: Shift
     var body: some View {
         HStack {
-            Text(shift.date.formatted(.dateTime.weekday(.abbreviated)))
-                .bold()
-                .frame(width: 50, alignment: .leading)
-                .foregroundColor(.primary)
-            
+            Text(shift.date.formatted(.dateTime.weekday(.abbreviated))).bold().frame(width: 50, alignment: .leading).foregroundColor(.primary)
             VStack(alignment: .leading) {
                 Text("\(shift.startTime.formatted(date: .omitted, time: .shortened)) - \(shift.endTime.formatted(date: .omitted, time: .shortened))")
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
-                
+                    .font(.subheadline).foregroundColor(.primary)
                 if shift.breakDurationMinutes > 0 {
-                    Text("Break: \(Int(shift.breakDurationMinutes))m")
-                        .font(.caption2)
-                        .foregroundColor(.blue)
+                    Text("Break: \(Int(shift.breakDurationMinutes))m").font(.caption2).foregroundColor(.blue)
                 }
             }
-            
             Spacer()
-            
-            Text(String(format: "%.1f h", shift.durationHours))
-                .bold()
-                .foregroundColor(.primary)
+            Text(String(format: "%.1f h", shift.durationHours)).bold().foregroundColor(.primary)
         }
         .padding()
         .background(Color(red: 0.97, green: 0.97, blue: 0.99))
@@ -403,7 +352,6 @@ struct AdvancedShiftEditView: View {
     var onSave: (Shift) -> Void
     @Environment(\.dismiss) var dismiss
     
-    // Local State for Sliders
     @State private var startHour: Double = 9.0
     @State private var endHour: Double = 17.0
     @State private var breakDuration: Double = 30.0
@@ -412,36 +360,24 @@ struct AdvancedShiftEditView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 30) {
-                    
-                    TimelineView(startHour: startHour, endHour: endHour, breakDuration: breakDuration)
-                        .frame(height: 80)
-                        .padding(.top, 20)
-                    
+                    TimelineView(startHour: startHour, endHour: endHour, breakDuration: breakDuration).frame(height: 80).padding(.top, 20)
                     HStack(spacing: 40) {
                         StatView(title: "Duration", value: String(format: "%.1f h", calculateDuration()))
                         StatView(title: "Earnings", value: "Est. $--")
                     }
-                    
                     Divider()
-                    
                     VStack(spacing: 25) {
                         ControlRow(icon: "clock", title: "Start Time", value: formatTime(hour: startHour)) {
-                            Slider(value: $startHour, in: 0...23.9, step: 0.25)
-                                .onChange(of: startHour) { _ in updateShiftModel() }
+                            Slider(value: $startHour, in: 0...23.9, step: 0.25).onChange(of: startHour) { _ in updateShiftModel() }
                         }
-                        
                         ControlRow(icon: "clock.fill", title: "End Time", value: formatTime(hour: endHour)) {
-                            Slider(value: $endHour, in: 0...23.9, step: 0.25)
-                                .onChange(of: endHour) { _ in updateShiftModel() }
+                            Slider(value: $endHour, in: 0...23.9, step: 0.25).onChange(of: endHour) { _ in updateShiftModel() }
                         }
-                        
                         ControlRow(icon: "cup.and.saucer.fill", title: "Break", value: "\(Int(breakDuration)) min") {
-                            Slider(value: $breakDuration, in: 0...120, step: 5)
-                                .onChange(of: breakDuration) { _ in updateShiftModel() }
+                            Slider(value: $breakDuration, in: 0...120, step: 5).onChange(of: breakDuration) { _ in updateShiftModel() }
                         }
                     }
                     .padding(.horizontal)
-                    
                     Spacer()
                 }
                 .padding()
@@ -451,28 +387,19 @@ struct AdvancedShiftEditView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        onSave(shift)
-                        dismiss()
-                    }
-                    .bold()
+                    Button("Save") { onSave(shift); dismiss() }.bold()
                 }
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             }
-            .onAppear {
-                loadFromModel()
-            }
+            .onAppear { loadFromModel() }
         }
     }
     
-    // MARK: Logic
+    // Logic
     func loadFromModel() {
         let calendar = Calendar.current
         let startComp = calendar.dateComponents([.hour, .minute], from: shift.startTime)
         let endComp = calendar.dateComponents([.hour, .minute], from: shift.endTime)
-        
         startHour = Double(startComp.hour ?? 0) + Double(startComp.minute ?? 0) / 60.0
         endHour = Double(endComp.hour ?? 0) + Double(endComp.minute ?? 0) / 60.0
         breakDuration = shift.breakDurationMinutes
@@ -480,7 +407,6 @@ struct AdvancedShiftEditView: View {
     
     func updateShiftModel() {
         if endHour < startHour { endHour = startHour }
-        
         shift.startTime = dateFromHour(startHour)
         shift.endTime = dateFromHour(endHour)
         shift.breakDurationMinutes = breakDuration
@@ -492,16 +418,8 @@ struct AdvancedShiftEditView: View {
         return Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: shift.date) ?? shift.date
     }
     
-    func formatTime(hour: Double) -> String {
-        let date = dateFromHour(hour)
-        return date.formatted(date: .omitted, time: .shortened)
-    }
-    
-    func calculateDuration() -> Double {
-        let raw = (endHour - startHour)
-        let afterBreak = raw - (breakDuration / 60)
-        return max(0, afterBreak)
-    }
+    func formatTime(hour: Double) -> String { dateFromHour(hour).formatted(date: .omitted, time: .shortened) }
+    func calculateDuration() -> Double { max(0, (endHour - startHour) - (breakDuration / 60)) }
 }
 
 // MARK: - 7. CUSTOM UI CONTROLS
@@ -513,17 +431,9 @@ struct TimelineView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.gray.opacity(0.15))
-                    .frame(height: 40)
-                
+                RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.15)).frame(height: 40)
                 HStack(spacing: 0) {
-                    ForEach(0..<5) { i in
-                        Text("\(i * 6)")
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                            .frame(maxWidth: .infinity)
-                    }
+                    ForEach(0..<5) { i in Text("\(i * 6)").font(.caption2).foregroundColor(.gray).frame(maxWidth: .infinity) }
                 }
                 .offset(y: 35)
                 
@@ -532,24 +442,14 @@ struct TimelineView: View {
                 let blockWidth = max(0, (endHour - startHour) * widthPerOneHour)
                 
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing))
-                    
+                    RoundedRectangle(cornerRadius: 8).fill(LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing))
                     if breakDuration > 0 {
                         let breakWidth = (breakDuration / 60.0) * widthPerOneHour
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.orange.opacity(0.8))
-                            .frame(width: min(breakWidth, blockWidth), height: 20)
-                            .overlay(
-                                Text("Break")
-                                    .font(.system(size: 8, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .opacity(breakWidth > 30 ? 1 : 0)
-                            )
+                        RoundedRectangle(cornerRadius: 4).fill(Color.orange.opacity(0.8)).frame(width: min(breakWidth, blockWidth), height: 20)
+                            .overlay(Text("Break").font(.system(size: 8, weight: .bold)).foregroundColor(.white).opacity(breakWidth > 30 ? 1 : 0))
                     }
                 }
-                .frame(width: blockWidth, height: 40)
-                .offset(x: startX)
+                .frame(width: blockWidth, height: 40).offset(x: startX)
                 .animation(.spring(response: 0.4, dampingFraction: 0.7), value: startHour)
                 .animation(.spring(response: 0.4, dampingFraction: 0.7), value: endHour)
                 .animation(.spring(response: 0.4, dampingFraction: 0.7), value: breakDuration)
@@ -563,18 +463,12 @@ struct ControlRow<Content: View>: View {
     let title: String
     let value: String
     let content: () -> Content
-    
     var body: some View {
         VStack(spacing: 10) {
             HStack {
-                Label(title, systemImage: icon)
-                    .font(.headline)
-                    .foregroundColor(Color(red: 0.3, green: 0.25, blue: 0.4))
+                Label(title, systemImage: icon).font(.headline).foregroundColor(Color(red: 0.3, green: 0.25, blue: 0.4))
                 Spacer()
-                Text(value)
-                    .font(.body.monospacedDigit())
-                    .bold()
-                    .foregroundColor(.blue)
+                Text(value).font(.body.monospacedDigit()).bold().foregroundColor(.blue)
             }
             content()
         }
@@ -588,17 +482,10 @@ struct ControlRow<Content: View>: View {
 struct StatView: View {
     let title: String
     let value: String
-    
     var body: some View {
         VStack(spacing: 5) {
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.gray)
-                .textCase(.uppercase)
-            Text(value)
-                .font(.title3)
-                .bold()
-                .foregroundColor(.primary)
+            Text(title).font(.caption).foregroundColor(.gray).textCase(.uppercase)
+            Text(value).font(.title3).bold().foregroundColor(.primary)
         }
     }
 }

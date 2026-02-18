@@ -13,6 +13,7 @@ struct HomeView: View {
     // --- 2. Navigation, State & DEMO Controls ---
     @State private var isDemoMode = true    // 🔴 THE MASTER DEMO SWITCH
     @State private var navigateToAnalysis = false
+    @State private var navigateToRoster = false // 🔴 NEW: Routes to Roster Calendar
     @State private var isProcessing = false // Triggers LoadingView
     @State private var isError = false      // Triggers ErrorView
     @State private var errorMessage = ""
@@ -87,36 +88,43 @@ struct HomeView: View {
             }
             .navigationBarBackButtonHidden(true)
             
-            // --- 4. Navigation Destination (THE MAGIC HAPPENS HERE) ---
+            // --- 4. Navigation Destinations ---
+            // Route 1: To the Underpaid/PaidRight Analysis
             .navigationDestination(isPresented: $navigateToAnalysis) {
                 if isDemoMode {
-                    // THE SMOKE & MIRRORS DEMO DATA
                     AnalysisResultView(analysis: PayslipAnalysis(
-                        totalBeforeTax: 978.72,  // Exact from your paper
-                        tax: 248.00,             // Exact from your paper
-                        superAmount: 100.18,     // Exact from your paper
-                        takeHome: 730.72,        // Exact from your paper
-                        expectedTakeHome: 895.50 // FAKED: Triggers the $164 Underpayment
+                        totalBeforeTax: 978.72,
+                        tax: 248.00,
+                        superAmount: 100.18,
+                        takeHome: 730.72,
+                        expectedTakeHome: 895.50
                     ))
                 } else {
-                    // JEFF'S REAL BACKEND DATA (He connects his variables here later)
                     AnalysisResultView(analysis: PayslipAnalysis(
-                        totalBeforeTax: 0.0,
-                        tax: 0.0,
-                        superAmount: 0.0,
-                        takeHome: 0.0,
-                        expectedTakeHome: 0.0
+                        totalBeforeTax: 0.0, tax: 0.0, superAmount: 0.0, takeHome: 0.0, expectedTakeHome: 0.0
                     ))
                 }
             }
+            // 🔴 NEW Route 2: To the Calendar View 🔴
+            .navigationDestination(isPresented: $navigateToRoster) {
+                RosterView()
+            }
+            
+            // --- 5. Pop-up Sheets ---
             .sheet(isPresented: $showScanner) {
                 ScannerView(scannedData: $scannedData)
             }
             .sheet(isPresented: $showRosterScanner) {
-                RosterScannerView()
+                // 🔴 NEW: When the scanner says 'Saved', trigger the transition 🔴
+                RosterScannerView(onSave: {
+                    // Delay slightly so the sheet animation finishes before navigating
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        navigateToRoster = true
+                    }
+                })
             }
             
-            // --- 5. Intercepting the OCR Data ---
+            // --- 6. Intercepting the OCR Data ---
             .onChange(of: scannedData) {
                 if scannedData != nil {
                     showScanner = false

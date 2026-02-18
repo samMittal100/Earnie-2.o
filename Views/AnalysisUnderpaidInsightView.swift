@@ -177,36 +177,43 @@ struct AnalysisUnderpaidInsightView: View {
                     .padding(.bottom, 5)
                     
                     // MARK: Mathematical Breakdown Rows
-                    VStack(spacing: 15) {
-                        row(title: "Total Before Tax Pay", value: totalBeforeTax, color: .black, isHighlighted: false)
-                        
-                        Button(action: { selectCategory("Underpaid") }) {
-                            row(title: "Underpaid", value: -underpaidAmount, color: underpaidRed, isUnderpaidRow: true, isHighlighted: selectedCategory == "Underpaid")
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                                        VStack(spacing: 15) {
+                                            
+                                            // 1. THE ACTUAL PAYSLIP MATH
+                                            row(title: "Actual Gross Pay", value: totalBeforeTax, color: .black, isHighlighted: false)
 
-                        Button(action: { selectCategory("Tax") }) {
-                            row(title: "Taxes", value: -tax, color: taxOrange, isHighlighted: selectedCategory == "Tax")
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        
-                        Button(action: { selectCategory("Super") }) {
-                            row(title: "Superannuation", value: superAmount, color: chartPurple, isHighlighted: selectedCategory == "Super")
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        
-                        Divider()
-                        
-                        Button(action: { selectCategory("Take Home") }) {
-                            row(title: "Final Take Home", value: takeHome, color: chartBlue, isBold: true, isHighlighted: selectedCategory == "Take Home")
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                    .padding(20)
-                    .background(Color.white)
-                    .cornerRadius(20)
-                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-                    .padding(.horizontal)
+                                            Button(action: { selectCategory("Tax") }) {
+                                                row(title: "Taxes Withheld", value: -tax, color: taxOrange, isHighlighted: selectedCategory == "Tax")
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                            
+                                            Divider()
+                                            
+                                            Button(action: { selectCategory("Take Home") }) {
+                                                row(title: "Final Take Home", value: takeHome, color: chartBlue, isBold: true, isHighlighted: selectedCategory == "Take Home")
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                            
+                                            // 2. EARNIE'S INSIGHTS (Separated from the core math)
+                                            Divider()
+                                                .padding(.vertical, 5)
+                                            
+                                            Button(action: { selectCategory("Underpaid") }) {
+                                                // 🔴 FIX: Removed the negative sign. It is missing money, not a deduction.
+                                                row(title: "Missing Pay (Underpaid)", value: underpaidAmount, color: underpaidRed, isUnderpaidRow: true, isHighlighted: selectedCategory == "Underpaid")
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                            
+                                            Button(action: { selectCategory("Super") }) {
+                                                row(title: "Super (Paid to Fund)", value: superAmount, color: chartPurple, isHighlighted: selectedCategory == "Super")
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                        }
+                                        .padding(20)
+                                        .background(Color.white)
+                                        .cornerRadius(20)
+                                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+                                        .padding(.horizontal)
                     
                     // MARK: The Jargon Buster Link
                     infoLinkSection
