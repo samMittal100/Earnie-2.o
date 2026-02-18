@@ -2,10 +2,10 @@ import SwiftUI
 import Charts
 
 struct AnalysisPaidView: View {
-    let totalEarnings: Double = 565
-    let tax: Double = 56
-    let superAmount: Double = 61
-    let takeHome: Double = 435
+    let totalEarnings: Double
+        let tax: Double
+        let superAmount: Double
+        let takeHome: Double
     
     // MARK: - State
     @State private var displayedAmount: Double = 0
@@ -262,5 +262,10 @@ struct AnalysisPaidView: View {
     }
 }
 #Preview {
-    AnalysisPaidView()
+    AnalysisPaidView(
+        totalEarnings: 565,
+        tax: 56,
+        superAmount: 61,
+        takeHome: 435
+    )
 }

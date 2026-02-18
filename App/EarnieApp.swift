@@ -5,7 +5,7 @@ import SwiftData
 struct EarnieApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            OnboardingView()
         }
         // 👇 This is the fix. We changed 'Item.self' to 'Payslip.self'
         .modelContainer(for: Payslip.self)

@@ -1,10 +1,3 @@
-//
-//  AnalysisResultView.swift
-//  Earnie
-//
-//  Created by Mathanghi Alahapphan on 18/2/2026.
-//
-
 import SwiftUI
 
 // MARK: - Payslip Model
@@ -26,18 +19,15 @@ struct PayslipAnalysis {
     }
 }
 
-
 // MARK: - Decision View
 struct AnalysisResultView: View {
-    
     let analysis: PayslipAnalysis
     
     var body: some View {
         ZStack {
-            
             if analysis.isUnderpaid {
-                
-                AnalysisUnderpaidView(
+                // Route to Splash Screen first
+                UnderpaidView(
                     totalBeforeTax: analysis.totalBeforeTax,
                     underpaidAmount: analysis.underpaidAmount,
                     tax: analysis.tax,
@@ -47,8 +37,8 @@ struct AnalysisResultView: View {
                 .transition(.opacity.combined(with: .scale))
                 
             } else {
-                
-                AnalysisPaidView(
+                // Route to Splash Screen first
+                PaidRightView(
                     totalEarnings: analysis.totalBeforeTax,
                     tax: analysis.tax,
                     superAmount: analysis.superAmount,
