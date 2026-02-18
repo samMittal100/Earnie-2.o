@@ -2,53 +2,42 @@ import SwiftUI
 
 struct UniversalButton: View {
     var title: String
-    var icon: String
-    
-    var subtitle: String? = nil
-    var statusColor: Color = .gray
-    var rightIcon: String = "chevron.right"
-    var backgroundColor: Color = .white // Default to white
-    
-    var alertBadge: String? = nil
-    var alertColor: Color = Color(red: 1.0, green: 0.4, blue: 0.4)
-    
+    var subtitle: String
+    var titleColor: Color
+    var subtitleColor: Color
+    var statusColor: Color
+    var rightIcon: String
+    var backgroundColor: Color
+    var borderColor: Color
     var action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 16) {
-                
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundColor(statusColor)
-                    .frame(width: 32)
-                
+            HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.body)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(red: 0.35, green: 0.32, blue: 0.45))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(titleColor) // Dynamic text color
                     
-                    if let sub = subtitle {
-                        Text(sub)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
+                    Text(subtitle)
+                        .font(.system(size: 12))
+                        .foregroundColor(subtitleColor) // Dynamic text color
                 }
                 
                 Spacer()
                 
+                // Right-side icon only
                 Image(systemName: rightIcon)
-                    .font(.body)
+                    .font(.title2)
                     .foregroundColor(statusColor)
             }
-            .padding()
+            .padding(.horizontal, 20)
             .frame(height: 72)
-            .background(backgroundColor) // Flexible background
+            .background(backgroundColor)
             .cornerRadius(20)
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color(red: 0.35, green: 0.32, blue: 0.45).opacity(0.5), lineWidth: 2) // Added border per prototype
+                    .stroke(borderColor, lineWidth: 2) // Dynamic border
             )
         }
     }

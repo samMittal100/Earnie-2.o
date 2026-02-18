@@ -26,11 +26,15 @@ struct CustomTabBar: View {
             ZStack {
                 Capsule()
                     .fill(Color.white.opacity(0.8))
-                    .background(.ultraThinMaterial) // Added Glass effect
+                    .background(.ultraThinMaterial)
+                    .clipShape(Capsule()) // Stops blur bleeding
+                
                 Capsule()
                     .stroke(Color.white.opacity(0.5), lineWidth: 0.5)
             }
         )
+        // Adding the shadow makes the Glass effect actually work
+        .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 10)
         .padding(.horizontal, 40)
         .padding(.bottom, 20)
     }
@@ -44,7 +48,7 @@ struct TabBarButton: View {
     
     var body: some View {
         Button(action: {
-            withAnimation(.spring()) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 selectedTab = tab
             }
         }) {
@@ -66,6 +70,17 @@ struct TabBarButton: View {
                 }
             )
             .foregroundColor(selectedTab == tab ? .blue : .gray) // Blue active state
+        }
+    }
+}
+
+#Preview {
+    ZStack {
+        // Previewing over the app background so you can see the glass effect
+        Color(red: 0.96, green: 0.96, blue: 0.98).ignoresSafeArea()
+        VStack {
+            Spacer()
+            CustomTabBar(selectedTab: .constant(0))
         }
     }
 }

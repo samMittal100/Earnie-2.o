@@ -45,7 +45,7 @@ struct GlassButton: View {
     ZStack {
         Color.black
         VStack {
-            GlassButton(title: "Upload Pay Slip", icon: "plus.app.fill", color: .blue) {}
+            GlassButton(title: "Upload Pay Slip", icon: "plus.app.fill") {}
             GlassButton(title: "Upload Roster", icon: "doc.text") {}
         }
         .padding()

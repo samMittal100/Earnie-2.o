@@ -3,7 +3,6 @@ import SwiftData
 
 struct HomeView: View {
     // --- 1. Database Queries ---
-    // These automatically update the UI when data is added/deleted
     @Query private var allRosters: [Roster]
     @Query private var allPayslips: [Payslip]
     
@@ -11,9 +10,11 @@ struct HomeView: View {
     @State private var showRosterScanner = false
     @State private var scannedData: PayslipData? = nil
     
-    // --- 2. Navigation State ---
-    // When this becomes true, the app jumps to the Analysis screen
+    // --- 2. Navigation & State Controls ---
     @State private var navigateToAnalysis = false
+    @State private var isProcessing = false // Triggers LoadingView
+    @State private var isError = false      // Triggers ErrorView
+    @State private var errorMessage = ""
 
     let bgColor = Color(red: 0.96, green: 0.96, blue: 0.98)
 
@@ -24,7 +25,7 @@ struct HomeView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 25) {
-                        HomeHeaderView(name: "Earnie")
+                        HomeHeaderView(name: "Human")
                         
                         // --- 3. Action Cards Row ---
                         HStack(spacing: 15) {
@@ -32,21 +33,29 @@ struct HomeView: View {
                             SquareActionCard(
                                 title: "Upload Payslip",
                                 subtitle: "Step 1",
-                                icon: "checkmark.seal.fill",
+                                icon: "contextualmenu.and.pointer.arrow",
                                 color: Color(red: 0.58, green: 0.69, blue: 0.95),
-                                isCompleted: !allPayslips.isEmpty, // Checkmark logic
+                                isCompleted: !allPayslips.isEmpty,
                                 action: { showScanner = true }
                             )
+                            // --- DEVELOPER HACK: TEST LOADING STATE ---
+                            .onLongPressGesture {
+                                triggerFakeLoading()
+                            }
                             
                             // Roster Card
                             SquareActionCard(
                                 title: "Upload Roster",
                                 subtitle: "Step 2",
-                                icon: "calendar.badge.plus",
+                                icon: "calendar",
                                 color: Color(red: 0.58, green: 0.69, blue: 0.95),
-                                isCompleted: !allRosters.isEmpty, // Checkmark logic
+                                isCompleted: !allRosters.isEmpty,
                                 action: { showRosterScanner = true }
                             )
+                            // --- DEVELOPER HACK: TEST ERROR STATE ---
+                            .onLongPressGesture {
+                                triggerFakeError()
+                            }
                         }
                         
                         MascotGreetingView()
@@ -55,11 +64,31 @@ struct HomeView: View {
                     }
                     .padding(24)
                 }
+                
+                // --- THE LOADING OVERLAY ---
+                if isProcessing {
+                    LoadingView()
+                        .transition(.opacity.animation(.easeInOut))
+                        .allowsHitTesting(true)
+                        .zIndex(1)
+                }
+                
+                // --- THE ERROR OVERLAY ---
+                if isError {
+                    ErrorView(message: errorMessage) {
+                        // Dismiss action
+                        withAnimation(.easeInOut) {
+                            isError = false
+                        }
+                    }
+                    .transition(.opacity.combined(with: .scale))
+                    .zIndex(2) // Sits above everything, even the loading screen
+                }
             }
+            .navigationBarBackButtonHidden(true)
+            
             // --- 4. Navigation Destination ---
-            // This is the hidden "Bam!" that takes you to analysis
             .navigationDestination(isPresented: $navigateToAnalysis) {
-                // Here we pass dummy data for now; Jeff will replace this with calculation logic later
                 AnalysisResultView(analysis: PayslipAnalysis(
                     totalBeforeTax: 565,
                     tax: 56,
@@ -74,12 +103,42 @@ struct HomeView: View {
             .sheet(isPresented: $showRosterScanner) {
                 RosterScannerView()
             }
+            
+            // --- 5. Intercepting the OCR Data ---
             .onChange(of: scannedData) {
-                // As soon as OCR finished, trigger the navigation
                 if scannedData != nil {
-                    navigateToAnalysis = true
+                    showScanner = false
+                    isProcessing = true
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                        isProcessing = false
+                        navigateToAnalysis = true
+                    }
                 }
             }
         }
     }
+    
+    // MARK: - Debug Testing Functions
+    
+    func triggerFakeLoading() {
+        UIImpactFeedbackGenerator(style: .heavy).impactOccurred() // Haptic feedback so you know it worked
+        isProcessing = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            isProcessing = false
+            navigateToAnalysis = true
+        }
+    }
+    
+    func triggerFakeError() {
+        UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        errorMessage = "Oops! I couldn't find a payslip in that image.\n\nPlease try again with better lighting."
+        withAnimation(.spring) {
+            isError = true
+        }
+    }
+}
+
+#Preview {
+    HomeView()
 }

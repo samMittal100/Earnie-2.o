@@ -54,3 +54,14 @@ struct SquareActionCard: View {
         }
     }
 }
+
+#Preview {
+    SquareActionCard(
+        title: "Upload Roster",
+        subtitle: "Step 2",
+        icon: "calendar",
+        color: Color(red: 0.58, green: 0.69, blue: 0.95),
+        isCompleted: true,
+        action: {print("button was pressed")}
+        )
+        }
