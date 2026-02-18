@@ -1,10 +1,3 @@
-//
-//  SquareActionCard.swift
-//  Earnie
-//
-//  Created by Somya Mittal on 17/2/2026.
-//
-
 import SwiftUI
 
 struct SquareActionCard: View {
@@ -22,14 +15,14 @@ struct SquareActionCard: View {
                         .font(.title2)
                         .foregroundColor(.white)
                         .padding(10)
-                        .background(color.opacity(0.8))
+                        .background(color)
                         .clipShape(Circle())
                     
                     Spacer()
                     
-                    Image(systemName: "arrow.up.right")
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                    Image(systemName: "plus.circle.fill") // Matching prototype icon
+                        .font(.title3)
+                        .foregroundColor(color.opacity(0.3))
                 }
                 
                 Spacer()
@@ -42,27 +35,15 @@ struct SquareActionCard: View {
                 Text(title)
                     .font(.headline)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(red: 0.35, green: 0.32, blue: 0.45)) // Dark text
                     .multilineTextAlignment(.leading)
             }
             .padding(16)
             .frame(maxWidth: .infinity)
             .frame(height: 160)
-            .background(Color(white: 0.15))
+            .background(Color.white) // Changed from dark to white
             .cornerRadius(24)
-            .overlay(
-                RoundedRectangle(cornerRadius: 24)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-            )
+            .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 10) // Soft shadow
         }
     }
-}
-
-#Preview {
-    HStack {
-        SquareActionCard(title: "Upload Payslip", subtitle: "Step 1", icon: "doc.text.fill", color: .blue) {}
-        SquareActionCard(title: "Upload Roster", subtitle: "Step 2", icon: "calendar", color: .green) {}
-    }
-    .padding()
-    .background(Color.black)
 }

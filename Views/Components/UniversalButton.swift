@@ -5,9 +5,9 @@ struct UniversalButton: View {
     var icon: String
     
     var subtitle: String? = nil
-    var statusColor: Color = .white
+    var statusColor: Color = .gray
     var rightIcon: String = "chevron.right"
-    var backgroundColor: Color = Color(white: 0.15)
+    var backgroundColor: Color = .white // Default to white
     
     var alertBadge: String? = nil
     var alertColor: Color = Color(red: 1.0, green: 0.4, blue: 0.4)
@@ -19,66 +19,37 @@ struct UniversalButton: View {
             HStack(spacing: 16) {
                 
                 Image(systemName: icon)
-                    .font(subtitle == nil ? .title2 : .title3)
-                    .foregroundColor(subtitle == nil ? .white : .gray)
+                    .font(.title3)
+                    .foregroundColor(statusColor)
                     .frame(width: 32)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.body)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(red: 0.35, green: 0.32, blue: 0.45))
                     
                     if let sub = subtitle {
                         Text(sub)
                             .font(.caption)
-                            .foregroundColor(statusColor)
+                            .foregroundColor(.gray)
                     }
                 }
                 
                 Spacer()
                 
-                if let badge = alertBadge {
-                    Text(badge)
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 10)
-                        .background(alertColor)
-                        .cornerRadius(12)
-                } else {
-                    Image(systemName: rightIcon)
-                        .font(.body)
-                        .foregroundColor(subtitle == nil ? .white.opacity(0.5) : statusColor)
-                }
+                Image(systemName: rightIcon)
+                    .font(.body)
+                    .foregroundColor(statusColor)
             }
             .padding()
             .frame(height: 72)
-            .background(backgroundColor)
+            .background(backgroundColor) // Flexible background
             .cornerRadius(20)
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    .stroke(Color(red: 0.35, green: 0.32, blue: 0.45).opacity(0.5), lineWidth: 2) // Added border per prototype
             )
         }
-    }
-}
-
-#Preview {
-    ZStack {
-        Color.black
-        VStack {
-            UniversalButton(title: "Upload", icon: "plus", backgroundColor: .blue) {}
-            
-            UniversalButton(
-                title: "March Payslip",
-                icon: "doc.text.fill",
-                subtitle: "Processed",
-                statusColor: .gray,
-                alertBadge: "Underpaid $45"
-            ) {}
-        }
-        .padding()
     }
 }

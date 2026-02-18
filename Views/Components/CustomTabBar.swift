@@ -6,15 +6,16 @@ struct CustomTabBar: View {
     var body: some View {
         HStack {
             TabBarButton(
-                icon: "arrow.up.doc.fill",
+                icon: "square.and.arrow.up",
                 title: "Upload",
                 tab: 0,
                 selectedTab: $selectedTab
             )
             
             Spacer()
+            
             TabBarButton(
-                icon: "doc.text.fill",
+                icon: "doc.text",
                 title: "Archive",
                 tab: 1,
                 selectedTab: $selectedTab
@@ -22,12 +23,16 @@ struct CustomTabBar: View {
         }
         .padding(12)
         .background(
-            Capsule()
-                .fill(Color(white: 0.2))
-                .shadow(color: .black.opacity(0.4), radius: 10, x: 0, y: 5)
+            ZStack {
+                Capsule()
+                    .fill(Color.white.opacity(0.8))
+                    .background(.ultraThinMaterial) // Added Glass effect
+                Capsule()
+                    .stroke(Color.white.opacity(0.5), lineWidth: 0.5)
+            }
         )
         .padding(.horizontal, 40)
-        .padding(.bottom, 10)
+        .padding(.bottom, 20)
     }
 }
 
@@ -56,17 +61,11 @@ struct TabBarButton: View {
                 ZStack {
                     if selectedTab == tab {
                         Capsule()
-                            .stroke(Color.purple, lineWidth: 2)
-                            .background(Capsule().fill(Color.purple.opacity(0.15)))
+                            .fill(Color.gray.opacity(0.1)) // Subtle highlight
                     }
                 }
             )
-            .foregroundColor(selectedTab == tab ? .white : .gray)
+            .foregroundColor(selectedTab == tab ? .blue : .gray) // Blue active state
         }
     }
-}
-
-#Preview {
-    CustomTabBar(selectedTab: .constant(0))
-        .preferredColorScheme(.dark)
 }
