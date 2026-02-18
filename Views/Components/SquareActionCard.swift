@@ -5,45 +5,52 @@ struct SquareActionCard: View {
     var subtitle: String
     var icon: String
     var color: Color
+    var isCompleted: Bool = false
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 12) {
-                HStack {
+                HStack(alignment: .top) {
+                    // Top Left Icon (e.g. checkmark.seal)
                     Image(systemName: icon)
                         .font(.title2)
                         .foregroundColor(.white)
-                        .padding(10)
-                        .background(color)
-                        .clipShape(Circle())
                     
                     Spacer()
                     
-                    Image(systemName: "plus.circle.fill") // Matching prototype icon
+                    // Top Right Icon (Square Plus or Checkmark)
+                    Image(systemName: isCompleted ? "checkmark.square.fill" : "plus.app")
                         .font(.title3)
-                        .foregroundColor(color.opacity(0.3))
+                        .foregroundColor(.white)
                 }
                 
                 Spacer()
                 
                 Text(subtitle.uppercased())
-                    .font(.caption2)
+                    .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white.opacity(0.8)) // White text
                 
                 Text(title)
                     .font(.headline)
                     .fontWeight(.bold)
-                    .foregroundColor(Color(red: 0.35, green: 0.32, blue: 0.45)) // Dark text
+                    .foregroundColor(.white) // White text
                     .multilineTextAlignment(.leading)
             }
             .padding(16)
             .frame(maxWidth: .infinity)
-            .frame(height: 160)
-            .background(Color.white) // Changed from dark to white
+            .frame(height: 150) // More square-shaped
+            .background(
+                // Soft gradient blue background from prototype
+                LinearGradient(
+                    colors: [color.opacity(0.85), color],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
             .cornerRadius(24)
-            .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 10) // Soft shadow
+            .shadow(color: color.opacity(0.4), radius: 15, x: 0, y: 10) // Blue shadow
         }
     }
 }

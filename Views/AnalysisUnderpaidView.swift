@@ -3,11 +3,11 @@ import Charts
 
 struct AnalysisUnderpaidView: View {
     // MARK: - Payslip Data
-    let totalBeforeTax: Double = 565
-    let underpaidAmount: Double = 106
-    let tax: Double = 56
-    let superAmount: Double = 61
-    let takeHome: Double = 435
+    let totalBeforeTax: Double
+        let underpaidAmount: Double
+        let tax: Double
+        let superAmount: Double
+        let takeHome: Double
     
     // MARK: - State for Animations
     @State private var displayedAmount: Double = 0
@@ -340,5 +340,11 @@ struct ContactCard: View {
 }
 
 #Preview {
-    AnalysisUnderpaidView()
+    AnalysisUnderpaidView(
+        totalBeforeTax: 565,
+        underpaidAmount: 106,
+        tax: 56,
+        superAmount: 61,
+        takeHome: 435
+    )
 }

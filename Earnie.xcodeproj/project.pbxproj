@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2222C8A82F458F520011CC0E /* AnalysisResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC35E1A2F45178000B5DFCF /* AnalysisResultView.swift */; };
 		22938B662F42F4C000322AD7 /* EarnieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22938B652F42F4C000322AD7 /* EarnieApp.swift */; };
 		22938B682F42F4C000322AD7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22938B672F42F4C000322AD7 /* ContentView.swift */; };
 		22938B772F42FBEA00322AD7 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22938B762F42FBE400322AD7 /* HomeView.swift */; };
@@ -194,6 +195,7 @@
 				BCC35ED52F457FFE00B5DFCF /* RosterView.swift in Sources */,
 				BC1A6A402F44D90C004C7B6A /* OnboardingView.swift in Sources */,
 				BCC35E192F45116B00B5DFCF /* PaidRightView.swift in Sources */,
+				2222C8A82F458F520011CC0E /* AnalysisResultView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
