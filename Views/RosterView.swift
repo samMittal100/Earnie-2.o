@@ -35,47 +35,47 @@ class RosterViewModel: ObservableObject {
     @Published var calendarMode: CalendarMode = .month
     
     // MARK: - Roster Logic
-    func loadMockRoster() {
-        let calendar = Calendar.current
-        let today = Date()
-        
-        // Ensure we work with the current week relative to today for the mock
-        guard let monday = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)),
-              let wednesday = calendar.date(byAdding: .day, value: 2, to: monday),
-              let friday = calendar.date(byAdding: .day, value: 4, to: monday),
-              let saturday = calendar.date(byAdding: .day, value: 5, to: monday)
-        else { return }
-        
-        shifts = [
-            Shift(date: monday,
-                  startTime: setTime(for: monday, hour: 9),
-                  endTime: setTime(for: monday, hour: 17),
-                  breakDurationMinutes: 60),
+        func loadMockRoster() {
+            let calendar = Calendar.current
+            let today = Date()
             
-            Shift(date: wednesday,
-                  startTime: setTime(for: wednesday, hour: 10, minute: 30),
-                  endTime: setTime(for: wednesday, hour: 15),
-                  breakDurationMinutes: 15),
+            // Ensure we work with the current week relative to today for the mock
+            guard let monday = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)),
+                  let tuesday = calendar.date(byAdding: .day, value: 1, to: monday),
+                  let saturday = calendar.date(byAdding: .day, value: 5, to: monday),
+                  let sunday = calendar.date(byAdding: .day, value: 6, to: monday)
+            else { return }
             
-            Shift(date: friday,
-                  startTime: setTime(for: friday, hour: 8),
-                  endTime: setTime(for: friday, hour: 16),
-                  breakDurationMinutes: 45),
+            // FAKE DATA ALIGNED WITH THE DEMO STORY
+            shifts = [
+                Shift(date: monday,
+                      startTime: setTime(for: monday, hour: 8, minute: 30),
+                      endTime: setTime(for: monday, hour: 17),
+                      breakDurationMinutes: 30),
+                
+                Shift(date: tuesday,
+                      startTime: setTime(for: tuesday, hour: 8, minute: 30),
+                      endTime: setTime(for: tuesday, hour: 17),
+                      breakDurationMinutes: 30),
+                
+                Shift(date: saturday,
+                      startTime: setTime(for: saturday, hour: 8, minute: 30),
+                      endTime: setTime(for: saturday, hour: 17),
+                      breakDurationMinutes: 30),
+                
+                // THE MASSIVE DOUBLE SHIFT (The source of the "underpayment")
+                Shift(date: sunday,
+                      startTime: setTime(for: sunday, hour: 8, minute: 0),
+                      endTime: setTime(for: sunday, hour: 20, minute: 30), // 8:30 PM
+                      breakDurationMinutes: 60)
+            ]
             
-            Shift(date: saturday,
-                  startTime: setTime(for: saturday, hour: 12),
-                  endTime: setTime(for: saturday, hour: 20),
-                  breakDurationMinutes: 30)
-        ]
-        
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-            isRosterUploaded = true
-            // Set selected date to a day with a shift for better UX on load
-            if let firstShift = shifts.first {
-                selectedDate = firstShift.date
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                isRosterUploaded = true
+                // Set selected date to the Sunday shift so it's instantly visible
+                selectedDate = sunday
             }
         }
-    }
     
     func updateShift(_ updated: Shift) {
         if let index = shifts.firstIndex(where: { $0.id == updated.id }) {

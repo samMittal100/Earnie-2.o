@@ -10,7 +10,8 @@ struct HomeView: View {
     @State private var showRosterScanner = false
     @State private var scannedData: PayslipData? = nil
     
-    // --- 2. Navigation & State Controls ---
+    // --- 2. Navigation, State & DEMO Controls ---
+    @State private var isDemoMode = true    // 🔴 THE MASTER DEMO SWITCH
     @State private var navigateToAnalysis = false
     @State private var isProcessing = false // Triggers LoadingView
     @State private var isError = false      // Triggers ErrorView
@@ -76,26 +77,37 @@ struct HomeView: View {
                 // --- THE ERROR OVERLAY ---
                 if isError {
                     ErrorView(message: errorMessage) {
-                        // Dismiss action
                         withAnimation(.easeInOut) {
                             isError = false
                         }
                     }
                     .transition(.opacity.combined(with: .scale))
-                    .zIndex(2) // Sits above everything, even the loading screen
+                    .zIndex(2)
                 }
             }
             .navigationBarBackButtonHidden(true)
             
-            // --- 4. Navigation Destination ---
+            // --- 4. Navigation Destination (THE MAGIC HAPPENS HERE) ---
             .navigationDestination(isPresented: $navigateToAnalysis) {
-                AnalysisResultView(analysis: PayslipAnalysis(
-                    totalBeforeTax: 565,
-                    tax: 56,
-                    superAmount: 61,
-                    takeHome: 435,
-                    expectedTakeHome: 541
-                ))
+                if isDemoMode {
+                    // THE SMOKE & MIRRORS DEMO DATA
+                    AnalysisResultView(analysis: PayslipAnalysis(
+                        totalBeforeTax: 978.72,  // Exact from your paper
+                        tax: 248.00,             // Exact from your paper
+                        superAmount: 100.18,     // Exact from your paper
+                        takeHome: 730.72,        // Exact from your paper
+                        expectedTakeHome: 895.50 // FAKED: Triggers the $164 Underpayment
+                    ))
+                } else {
+                    // JEFF'S REAL BACKEND DATA (He connects his variables here later)
+                    AnalysisResultView(analysis: PayslipAnalysis(
+                        totalBeforeTax: 0.0,
+                        tax: 0.0,
+                        superAmount: 0.0,
+                        takeHome: 0.0,
+                        expectedTakeHome: 0.0
+                    ))
+                }
             }
             .sheet(isPresented: $showScanner) {
                 ScannerView(scannedData: $scannedData)
@@ -120,9 +132,8 @@ struct HomeView: View {
     }
     
     // MARK: - Debug Testing Functions
-    
     func triggerFakeLoading() {
-        UIImpactFeedbackGenerator(style: .heavy).impactOccurred() // Haptic feedback so you know it worked
+        UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
         isProcessing = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             isProcessing = false
