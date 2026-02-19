@@ -177,43 +177,42 @@ struct AnalysisUnderpaidInsightView: View {
                     .padding(.bottom, 5)
                     
                     // MARK: Mathematical Breakdown Rows
-                                        VStack(spacing: 15) {
-                                            
-                                            // 1. THE ACTUAL PAYSLIP MATH
-                                            row(title: "Actual Gross Pay", value: totalBeforeTax, color: .black, isHighlighted: false)
+                    VStack(spacing: 15) {
+                        
+                        // 1. THE ACTUAL PAYSLIP MATH
+                        row(title: "Actual Gross Pay", value: totalBeforeTax, color: .black, isHighlighted: false)
 
-                                            Button(action: { selectCategory("Tax") }) {
-                                                row(title: "Taxes Withheld", value: -tax, color: taxOrange, isHighlighted: selectedCategory == "Tax")
-                                            }
-                                            .buttonStyle(PlainButtonStyle())
-                                            
-                                            Divider()
-                                            
-                                            Button(action: { selectCategory("Take Home") }) {
-                                                row(title: "Final Take Home", value: takeHome, color: chartBlue, isBold: true, isHighlighted: selectedCategory == "Take Home")
-                                            }
-                                            .buttonStyle(PlainButtonStyle())
-                                            
-                                            // 2. EARNIE'S INSIGHTS (Separated from the core math)
-                                            Divider()
-                                                .padding(.vertical, 5)
-                                            
-                                            Button(action: { selectCategory("Underpaid") }) {
-                                                // 🔴 FIX: Removed the negative sign. It is missing money, not a deduction.
-                                                row(title: "Missing Pay (Underpaid)", value: underpaidAmount, color: underpaidRed, isUnderpaidRow: true, isHighlighted: selectedCategory == "Underpaid")
-                                            }
-                                            .buttonStyle(PlainButtonStyle())
-                                            
-                                            Button(action: { selectCategory("Super") }) {
-                                                row(title: "Super (Paid to Fund)", value: superAmount, color: chartPurple, isHighlighted: selectedCategory == "Super")
-                                            }
-                                            .buttonStyle(PlainButtonStyle())
-                                        }
-                                        .padding(20)
-                                        .background(Color.white)
-                                        .cornerRadius(20)
-                                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-                                        .padding(.horizontal)
+                        Button(action: { selectCategory("Tax") }) {
+                            row(title: "Taxes Withheld", value: -tax, color: taxOrange, isHighlighted: selectedCategory == "Tax")
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Divider()
+                        
+                        Button(action: { selectCategory("Take Home") }) {
+                            row(title: "Final Take Home", value: takeHome, color: chartBlue, isBold: true, isHighlighted: selectedCategory == "Take Home")
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        // 2. EARNIE'S INSIGHTS (Separated from the core math)
+                        Divider()
+                            .padding(.vertical, 5)
+                        
+                        Button(action: { selectCategory("Underpaid") }) {
+                            row(title: "Missing Pay (Underpaid)", value: underpaidAmount, color: underpaidRed, isUnderpaidRow: true, isHighlighted: selectedCategory == "Underpaid")
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Button(action: { selectCategory("Super") }) {
+                            row(title: "Super (Paid to Fund)", value: superAmount, color: chartPurple, isHighlighted: selectedCategory == "Super")
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    .padding(20)
+                    .background(Color.white)
+                    .cornerRadius(20)
+                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+                    .padding(.horizontal)
                     
                     // MARK: The Jargon Buster Link
                     infoLinkSection
@@ -224,18 +223,6 @@ struct AnalysisUnderpaidInsightView: View {
                     Spacer(minLength: 120)
                 }
             }
-            
-            // 🔴 THE FIX: Duplicate Footer commented out so it doesn't overlap with ContentView
-            /*
-            VStack(spacing: 18) {
-                HStack(spacing: 5) {
-                    Text("Scroll down for more info").font(.subheadline).foregroundColor(.blue)
-                    Image(systemName: "arrow.down").font(.caption).foregroundColor(.blue)
-                }
-                footerButtons
-            }
-            .padding(.bottom, 10)
-            */
         }
         .onAppear { animateNumber() }
     }
@@ -270,7 +257,13 @@ struct AnalysisUnderpaidInsightView: View {
         let dx = location.x - center.x
         let dy = location.y - center.y
         let distance = sqrt(dx*dx + dy*dy)
-        if distance < radius * 0.65 { return }
+        
+        // MODIFIED: Reset selection if clicking the center hole
+        if distance < radius * 0.65 {
+            withAnimation(.spring()) { selectedCategory = nil }
+            return
+        }
+        
         var angle = atan2(dy, dx) + .pi / 2
         if angle < 0 { angle += 2 * .pi }
         let total = chartTotal
@@ -284,6 +277,9 @@ struct AnalysisUnderpaidInsightView: View {
             }
             currentAngle += itemAngle
         }
+        
+        // ADDED: Reset if no slice matched
+        withAnimation(.spring()) { selectedCategory = nil }
     }
 
     // Interactive Payslip Button
@@ -307,20 +303,16 @@ struct AnalysisUnderpaidInsightView: View {
         .padding(.horizontal)
         .foregroundColor(.black)
         .sheet(isPresented: $showInteractivePayslip) {
-            InteractivePayslipView()
+            // Placeholder for sheet content (assumed existing in project)
+            Text("Interactive Payslip View")
         }
     }
 
-    // ATO & Fair Work Contacts
+    // MARK: - CONTACTS SECTION (Uses the component defined below)
     var contactsSection: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Contacts").font(.title2).bold().padding(.horizontal)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 15) {
-                    ContactCard(name: "Fair Work", link: "fairwork.gov.au", phone: "13 13 94")
-                    ContactCard(name: "ATO", link: "ato.gov.au", phone: "13 28 61")
-                }.padding(.horizontal)
-            }
+            ContactsSlider()
         }
     }
 
@@ -329,31 +321,9 @@ struct AnalysisUnderpaidInsightView: View {
         displayedAmount = 0
         withAnimation(.linear(duration: 1.0)) { displayedAmount = takeHome }
     }
-    
-    // (Footer logic kept for reference, but UI is commented out above)
-    var footerButtons: some View {
-        HStack(spacing: 20) {
-            footerButton(label: "Upload", icon: "square.and.arrow.up", color: .black)
-            footerButton(label: "Archive", icon: "doc.text", color: .blue)
-        }.padding(.horizontal, 20)
-    }
-    
-    func footerButton(label: String, icon: String, color: Color) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: icon)
-            Text(label).font(.caption).bold()
-        }
-        .foregroundColor(color).frame(maxWidth: .infinity).padding(.vertical, 12)
-        .background(liquidGlassBackground).cornerRadius(20)
-    }
-
-    var liquidGlassBackground: some View {
-        RoundedRectangle(cornerRadius: 22, style: .continuous)
-            .fill(LinearGradient(colors: [Color.white.opacity(0.8), Color.white.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing))
-            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 5, y: 5)
-    }
 }
 
+// MARK: - PREVIEW
 #Preview {
     AnalysisUnderpaidInsightView(
         totalBeforeTax: 978.72,
@@ -362,4 +332,100 @@ struct AnalysisUnderpaidInsightView: View {
         superAmount: 100.18,
         takeHome: 730.72
     )
+}
+
+// MARK: - CONTACTS SLIDER COMPONENT
+// This struct is defined here so it is available to the main view above
+struct ContactsSlider: View {
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 15) {
+                
+                // 1. Fair Work
+                ContactCard(name: "Fair Work", subtitle: "fairwork.gov.au", phone: "13 13 94")
+                
+                // 2. ATO (General)
+                ContactCard(name: "ATO", subtitle: "ato.gov.au", phone: "13 28 61")
+
+                // 3. ATO (Tax Help)
+                ContactCard(name: "ATO (Tax Help)", subtitle: "ato.gov.au", phone: "1800 287 287")
+                
+                // 4. Working Women's
+                ContactCard(name: "Working Women's", subtitle: "wwc.org.au", phone: "1800 992 842")
+                
+                // 5. RAFFWU
+                ContactCard(name: "RAFFWU", subtitle:"raffwu.org.au", phone: "1300 723 398")
+            }
+            .padding(.bottom, 20)
+            .padding(.leading, 20)
+            .padding(.trailing, 20)
+        }
+    }
+
+    // INTERNAL CARD COMPONENT
+    struct ContactCard: View {
+        let name: String
+        let subtitle: String
+        let phone: String
+        var isWebsite: Bool = false
+        
+        let customPhoneColor = Color(red: 77/255, green: 65/255, blue: 101/255)
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(name)
+                    .font(.headline)
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+
+                // Subtitle Row
+                HStack {
+                    let isLink = subtitle.contains(".")
+                    Image(systemName: "globe")
+                        .font(.caption)
+                        .foregroundColor(isLink ? .blue : .gray)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(isLink ? .blue : .gray)
+                        .lineLimit(1)
+                }
+
+                // Phone Row
+                HStack {
+                    Image(systemName: isWebsite ? "safari.fill" : "phone.fill")
+                        .font(.caption)
+                        .foregroundColor(isWebsite ? .blue : customPhoneColor)
+                    Text(phone)
+                        .font(.caption)
+                        .foregroundColor(isWebsite ? .blue : customPhoneColor)
+                        .lineLimit(1)
+                }
+            }
+            .padding()
+            .frame(width: 170, alignment: .leading)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.9), Color.blue.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                    RoundedRectangle(cornerRadius: 15)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [Color.white, Color.white.opacity(0.0)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                }
+            )
+            .shadow(color: Color.blue.opacity(0.08), radius: 8, x: 0, y: 4)
+        }
+    }
 }

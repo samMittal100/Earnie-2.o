@@ -46,9 +46,22 @@
 		BCC35ED42F457E3200B5DFCF /* RosterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RosterView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BCC35FBA2F46B15400B5DFCF /* Exceptions for "Components" folder in "Earnie" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ContactsSlider.swift,
+			);
+			target = 22938B612F42F4C000322AD7 /* Earnie */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		22938B912F434E6900322AD7 /* Components */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BCC35FBA2F46B15400B5DFCF /* Exceptions for "Components" folder in "Earnie" target */,
+			);
 			path = Components;
 			sourceTree = "<group>";
 		};
