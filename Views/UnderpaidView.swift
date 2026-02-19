@@ -42,8 +42,8 @@ struct UnderpaidView: View {
         }
         // MARK: Auto-Redirect Timer
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                withAnimation(.easeInOut(duration: 0.8)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                withAnimation(.easeInOut(duration: 0.3)) {
                     shouldRedirect = true
                 }
             }

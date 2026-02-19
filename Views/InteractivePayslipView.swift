@@ -65,7 +65,7 @@ struct InteractivePayslipView: View {
                             .padding(.horizontal)
                         
                         // MARK: The Payslip Canvas
-                        Image("payslip_demo")
+                        Image("Payslip_demo")
                             .resizable()
                             .scaledToFit()
                             .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)

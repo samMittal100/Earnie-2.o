@@ -539,6 +539,7 @@ struct AdvancedShiftEditView: View {
     @State private var breakDuration: Double = 30.0
     @State private var overtimeDuration: Double = 0.0
     
+    
     // UI Text State
     @State private var startText: String = "09:00"
     @State private var endText: String = "17:00"
@@ -553,6 +554,7 @@ struct AdvancedShiftEditView: View {
                 VStack(spacing: 30) {
                     
                     // Timeline Visualization
+                    // CHANGE: Pass highlight binding to timeline
                     TimelineView(
                         startHour: startHour,
                         endHour: endHour,
@@ -569,26 +571,62 @@ struct AdvancedShiftEditView: View {
                         StatView(title: "Break", value: "\(Int(breakDuration)) m")
                     }
                     
+                    
                     Divider()
                     
                     // Inputs
                     VStack(spacing: 25) {
+                        TimeInputRow(
+                            title: "Start",
+                            icon: "clock",
+                            text: $startText,
+                            themeColor: themeColor,
+                            onCommit: {
+                                if let val = timeStringToDouble(startText) {
+                                    startHour = val
+                                    updateShiftModel()
+                                }
+                            }
+                        )
                         
-                        TimeInputRow(title: "Start Time", icon: "clock", text: $startText, themeColor: themeColor) {
-                            validateAndUpdateStart()
-                        }
+                        TimeInputRow(
+                            title: "End",
+                            icon: "clock.fill",
+                            text: $endText,
+                            themeColor: themeColor,
+                            onCommit: {
+                                if let val = timeStringToDouble(endText) {
+                                    endHour = val
+                                    updateShiftModel()
+                                }
+                            }
+                        )
                         
-                        TimeInputRow(title: "End Time", icon: "clock.fill", text: $endText, themeColor: themeColor) {
-                            validateAndUpdateEnd()
-                        }
+                        BreakInputRow(
+                            title: "Break (min)",
+                            icon: "cup.and.saucer",
+                            text: $breakText,
+                            themeColor: themeColor,
+                            onCommit: {
+                                if let val = Double(breakText) {
+                                    breakDuration = max(0, val)
+                                    updateShiftModel()
+                                }
+                            }
+                        )
                         
-                        BreakInputRow(title: "Break (min)", icon: "cup.and.saucer.fill", text: $breakText, themeColor: themeColor) {
-                            validateAndUpdateBreak()
-                        }
-                        
-                        OvertimeInputRow(title: "Overtime (min)", icon: "hourglass.badge.plus", text: $overtimeText, themeColor: themeColor) {
-                            validateAndUpdateOvertime()
-                        }
+                        OvertimeInputRow(
+                            title: "Overtime (min)",
+                            icon: "bolt",
+                            text: $overtimeText,
+                            themeColor: themeColor,
+                            onCommit: {
+                                if let val = Double(overtimeText) {
+                                    overtimeDuration = max(0, val)
+                                    updateShiftModel()
+                                }
+                            }
+                        )
                     }
                     .padding(.horizontal)
                     
@@ -629,66 +667,31 @@ struct AdvancedShiftEditView: View {
         }
     }
     
-    // Logic & Validation
+    
+    
     func loadFromModel() {
-        let calendar = Calendar.current
-        let startComp = calendar.dateComponents([.hour, .minute], from: shift.startTime)
-        let endComp = calendar.dateComponents([.hour, .minute], from: shift.endTime)
+        startHour = 9.0
+        endHour = 17.0
+        breakDuration = 120.0
+        overtimeDuration = 90.0
         
-        startHour = Double(startComp.hour ?? 0) + Double(startComp.minute ?? 0) / 60.0
-        endHour = Double(endComp.hour ?? 0) + Double(endComp.minute ?? 0) / 60.0
-        breakDuration = shift.breakDurationMinutes
-        overtimeDuration = shift.overtimeMinutes
+        startText = "09:00"
+        endText = "17:00"
+        breakText = "120"
+        overtimeText = "90"
         
-        startText = formatTimeForInput(hour: startHour)
-        endText = formatTimeForInput(hour: endHour)
-        breakText = "\(Int(breakDuration))"
-        overtimeText = "\(Int(overtimeDuration))"
+        updateShiftModel()
     }
     
     func updateShiftModel() {
-        if endHour < startHour { endHour = startHour }
+        if endHour < startHour {
+            endHour = startHour
+        }
         
         shift.startTime = dateFromHour(startHour)
         shift.endTime = dateFromHour(endHour)
         shift.breakDurationMinutes = breakDuration
         shift.overtimeMinutes = overtimeDuration
-    }
-    
-    func validateAndUpdateStart() {
-        if let newHour = timeStringToDouble(startText) {
-            withAnimation {
-                startHour = newHour
-                updateShiftModel()
-            }
-        }
-    }
-    
-    func validateAndUpdateEnd() {
-        if let newHour = timeStringToDouble(endText) {
-            withAnimation {
-                endHour = newHour
-                updateShiftModel()
-            }
-        }
-    }
-    
-    func validateAndUpdateBreak() {
-        if let val = Double(breakText) {
-            withAnimation {
-                breakDuration = val
-                updateShiftModel()
-            }
-        }
-    }
-    
-    func validateAndUpdateOvertime() {
-        if let val = Double(overtimeText) {
-            withAnimation {
-                overtimeDuration = val
-                updateShiftModel()
-            }
-        }
     }
     
     func timeStringToDouble(_ time: String) -> Double? {
@@ -700,12 +703,6 @@ struct AdvancedShiftEditView: View {
               let h = Double(parts[0]),
               let m = Double(parts[1]) else { return nil }
         return h + (m / 60.0)
-    }
-    
-    func formatTimeForInput(hour: Double) -> String {
-        let h = Int(hour)
-        let m = Int((hour - Double(h)) * 60)
-        return String(format: "%02d:%02d", h, m)
     }
     
     func dateFromHour(_ value: Double) -> Date {
@@ -722,10 +719,13 @@ struct AdvancedShiftEditView: View {
     }
     
     func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                        to: nil,
+                                        from: nil,
+                                        for: nil)
     }
+    
 }
-
 // MARK: - 7. EDIT SHEET COMPONENTS
 struct TimeInputRow: View {
     let title: String
@@ -908,79 +908,92 @@ struct OvertimeInputRow: View {
     }
 }
 
+// MARK: - Timeline View (Simple Version with Labels)
 struct TimelineView: View {
     var startHour: Double
     var endHour: Double
     var breakDuration: Double
     var overtimeDuration: Double
     
-    let workColor = Color(red: 136/255, green: 161/255, blue: 243/255)
-    let breakColor = Color(red: 136/255, green: 161/255, blue: 243/255).opacity(0.35)
-    let overtimeColor = Color(red: 83/255, green: 86/255, blue: 133/255)
+    // Purple theme
+    let workColor = Color(red: 160/255, green: 150/255, blue: 200/255)
+    let breakColor = Color(red: 200/255, green: 195/255, blue: 230/255)
+    let overtimeColor = Color(red: 70/255, green: 72/255, blue: 120/255)
     
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.gray.opacity(0.15))
-                    .frame(height: 40)
                 
-                HStack(spacing: 0) {
-                    ForEach(0..<5) { i in
-                        Text("\(i * 6)")
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                .offset(y: 35)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(workColor.opacity(0.15))
+                    .frame(height: 40)
                 
                 let shiftDurationHours = endHour - startHour
                 let overtimeHours = overtimeDuration / 60.0
-                
                 let widthPerHour = geo.size.width / 24.0
                 let startX = startHour * widthPerHour
-                
                 let totalVisualHours = shiftDurationHours + overtimeHours
                 let totalBarWidth = max(0, totalVisualHours * widthPerHour)
-                
                 let totalShiftMinutes = shiftDurationHours * 60.0
                 let actualWorkMinutes = max(0, totalShiftMinutes - breakDuration)
                 let preBreakWork = actualWorkMinutes / 2.0
                 let postBreakWork = actualWorkMinutes / 2.0
-                
                 let totalVisualMinutes = totalShiftMinutes + overtimeDuration
                 
                 if totalBarWidth > 0 && totalVisualMinutes > 0 {
                     HStack(spacing: 0) {
+                        
+                        // WORK (first)
                         Rectangle()
                             .fill(workColor)
                             .frame(width: (preBreakWork / totalVisualMinutes) * totalBarWidth)
                         
-                        Rectangle()
-                            .fill(breakColor)
-                            .frame(width: (breakDuration / totalVisualMinutes) * totalBarWidth)
+                        // BREAK
+                        ZStack {
+                            Rectangle()
+                                .fill(breakColor)
+
+                            if breakDuration > 0 {
+                                Text("Break")
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .foregroundColor(workColor)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.3)
+                                    .allowsTightening(true)
+                            }
+                        }
+                        .frame(width: (breakDuration / totalVisualMinutes) * totalBarWidth)
+
                         
+                        // WORK (second)
                         Rectangle()
                             .fill(workColor)
                             .frame(width: (postBreakWork / totalVisualMinutes) * totalBarWidth)
                         
-                        Rectangle()
-                            .fill(overtimeColor)
-                            .frame(width: (overtimeDuration / totalVisualMinutes) * totalBarWidth)
+                        // OVERTIME
+                        ZStack {
+                            Rectangle()
+                                .fill(overtimeColor)
+                            
+                            if overtimeDuration > 0 {
+                                Text("OT")
+                                    .font(.caption2)
+                                    .bold()
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .frame(width: (overtimeDuration / totalVisualMinutes) * totalBarWidth)
                     }
                     .frame(width: totalBarWidth, height: 40)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                     .offset(x: startX)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.7), value: startHour)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.7), value: endHour)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.7), value: overtimeDuration)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.7), value: breakDuration)
                 }
             }
         }
+        .frame(height: 50)
     }
 }
+
 
 struct StatView: View {
     let title: String
@@ -992,6 +1005,7 @@ struct StatView: View {
                 .font(.caption)
                 .foregroundColor(.gray)
                 .textCase(.uppercase)
+            
             Text(value)
                 .font(.title3)
                 .bold()

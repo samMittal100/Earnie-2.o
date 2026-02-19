@@ -102,7 +102,7 @@ struct AnalysisUnderpaidInsightView: View {
                     ZStack {
                         Chart(chartData) { item in
                             SectorMark(
-                                angle: .value("Amount", animateChart ? item.amount : 0),
+                                angle: .value("Amount", item.amount),
                                 innerRadius: .ratio(0.65),
                                 outerRadius: selectedCategory == item.category ? .ratio(1.05) : .ratio(1.0),
                                 angularInset: 1.5
@@ -122,6 +122,12 @@ struct AnalysisUnderpaidInsightView: View {
                                         handleTap(location: location, in: geometry)
                                     }
                             }
+                        }
+                        .mask {
+                            Circle()
+                                .trim(from: 0, to: animateChart ? 1.0 : 0.0)
+                                .stroke(style: StrokeStyle(lineWidth: 300, lineCap: .butt))
+                                .rotationEffect(.degrees(-90))
                         }
                         
                         // Center Text of Pie Chart
@@ -148,23 +154,26 @@ struct AnalysisUnderpaidInsightView: View {
                     }
                     .onAppear { withAnimation(.easeInOut(duration: 1.0)) { animateChart = true } }
                     
-                    // MARK: Earnie's Insight (Accessibility Upgrade)
+                    // MARK: Earnie's Insight
                     HStack(alignment: .top, spacing: 15) {
-                        Image("earnieMascot2")
+                        Image("EarnieMascot2")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 45)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.1), radius: 3)
-                        
+                            .frame(width: 55, height: 55)
+                            .padding(6)
+                            .background(
+                                Circle()
+                                    .fill(Color.white)
+                            )
+                            .shadow(color: .black.opacity(0.1), radius: 4)
+
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Earnie's Insight")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(darkNavy)
-                            
+
                             Text("Your employer paid you for standard hours on Sunday. Based on your roster, you worked a 12-hour shift and are missing your Sunday Double Time penalty rates.")
-                                .font(.system(size: 14, weight: .regular))
+                                .font(.system(size: 14))
                                 .foregroundColor(.gray)
                                 .lineSpacing(4)
                         }
@@ -194,7 +203,7 @@ struct AnalysisUnderpaidInsightView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                         
-                        // 2. EARNIE'S INSIGHTS (Separated from the core math)
+                        // 2. EARNIE'S INSIGHTS
                         Divider()
                             .padding(.vertical, 5)
                         
@@ -303,8 +312,9 @@ struct AnalysisUnderpaidInsightView: View {
         .padding(.horizontal)
         .foregroundColor(.black)
         .sheet(isPresented: $showInteractivePayslip) {
-                    InteractivePayslipView()
-                }    }
+            InteractivePayslipView()
+        }
+    }
 
     // MARK: - CONTACTS SECTION (Uses the component defined below)
     var contactsSection: some View {
@@ -331,4 +341,3 @@ struct AnalysisUnderpaidInsightView: View {
         takeHome: 730.72
     )
 }
-
