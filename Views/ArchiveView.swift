@@ -18,27 +18,11 @@ struct ArchiveView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
                     
-                    // MARK: Top Nav (Scanner Icon)
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            print("Open Scanner")
-                        }) {
-                            Image(systemName: "viewfinder")
-                                .font(.title2)
-                                .foregroundColor(darkNavy)
-                                .padding(10)
-                                .background(Color.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                        }
-                    }
-                    .padding(.top, 20)
-                    
                     // MARK: Header
                     Text("Archives")
                         .font(.system(size: 34, weight: .bold))
                         .foregroundColor(darkNavy)
+                        .padding(.top, 20)
                     
                     // MARK: Date Range Filter
                     VStack(alignment: .leading, spacing: 12) {
@@ -47,30 +31,12 @@ struct ArchiveView: View {
                             .fontWeight(.bold)
                             .foregroundColor(.gray)
                         
-                        HStack(spacing: 30) {
-                            // "From" Picker
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("FROM").font(.system(size: 10, weight: .bold)).foregroundColor(.gray)
-                                DatePicker("", selection: $startDate, displayedComponents: .date)
-                                    .labelsHidden()
-                                    .tint(primaryBlue)
-                            }
-                            
-                            // "To" Picker
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("TO").font(.system(size: 10, weight: .bold)).foregroundColor(.gray)
-                                DatePicker("", selection: $endDate, displayedComponents: .date)
-                                    .labelsHidden()
-                                    .tint(primaryBlue)
-                            }
-                            Spacer()
-                        }
+                        // 🔴 INJECTED: The new component replaces the old HStack
+                        DateRangePickerComponent(startDate: $startDate, endDate: $endDate)
                     }
                     .padding(.bottom, 10)
                     
                     // MARK: - 4. DUMMY DATA SECTIONS
-                    // (Jeff will replace these with SwiftData @Query loops later)
-                    
                     // January
                     VStack(alignment: .leading, spacing: 12) {
                         Text("January")
