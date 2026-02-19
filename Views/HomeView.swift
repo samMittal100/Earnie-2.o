@@ -13,10 +13,14 @@ struct HomeView: View {
     // --- 2. Navigation, State & DEMO Controls ---
     @State private var isDemoMode = true    // 🔴 THE MASTER DEMO SWITCH
     @State private var navigateToAnalysis = false
-    @State private var navigateToRoster = false // 🔴 NEW: Routes to Roster Calendar
-    @State private var isProcessing = false // Triggers LoadingView
-    @State private var isError = false      // Triggers ErrorView
+    @State private var navigateToRoster = false
+    @State private var isProcessing = false
+    @State private var isError = false
     @State private var errorMessage = ""
+    
+    // 🔴 NEW: Temporary states for the demo so the checkmarks reset every time you open the app
+    @State private var hasUploadedRoster = false
+    @State private var hasUploadedPayslip = false
 
     let bgColor = Color(red: 0.96, green: 0.96, blue: 0.98)
 
@@ -27,36 +31,37 @@ struct HomeView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 25) {
-                        HomeHeaderView(name: "Human")
+                        
+                        // Using the updated name for the presentation
+                        HomeHeaderView(name: "Cameron")
                         
                         // --- 3. Action Cards Row ---
                         HStack(spacing: 15) {
-                            // Payslip Card
-                            SquareActionCard(
-                                title: "Upload Payslip",
-                                subtitle: "Step 1",
-                                icon: "contextualmenu.and.pointer.arrow",
-                                color: Color(red: 0.58, green: 0.69, blue: 0.95),
-                                isCompleted: !allPayslips.isEmpty,
-                                action: { showScanner = true }
-                            )
-                            // --- DEVELOPER HACK: TEST LOADING STATE ---
-                            .onLongPressGesture {
-                                triggerFakeLoading()
-                            }
                             
-                            // Roster Card
+                            // STEP 1: Roster Card
                             SquareActionCard(
                                 title: "Upload Roster",
-                                subtitle: "Step 2",
+                                subtitle: "Step 1",
                                 icon: "calendar",
                                 color: Color(red: 0.58, green: 0.69, blue: 0.95),
-                                isCompleted: !allRosters.isEmpty,
+                                isCompleted: hasUploadedRoster, // 🔴 Tied to our safe temporary state
                                 action: { showRosterScanner = true }
                             )
-                            // --- DEVELOPER HACK: TEST ERROR STATE ---
                             .onLongPressGesture {
                                 triggerFakeError()
+                            }
+                            
+                            // STEP 2: Payslip Card
+                            SquareActionCard(
+                                title: "Upload Payslip",
+                                subtitle: "Step 2",
+                                icon: "contextualmenu.and.pointer.arrow",
+                                color: Color(red: 0.58, green: 0.69, blue: 0.95),
+                                isCompleted: hasUploadedPayslip, // 🔴 Tied to our safe temporary state
+                                action: { showScanner = true }
+                            )
+                            .onLongPressGesture {
+                                triggerFakeLoading()
                             }
                         }
                         
@@ -89,7 +94,6 @@ struct HomeView: View {
             .navigationBarBackButtonHidden(true)
             
             // --- 4. Navigation Destinations ---
-            // Route 1: To the Underpaid/PaidRight Analysis
             .navigationDestination(isPresented: $navigateToAnalysis) {
                 if isDemoMode {
                     AnalysisResultView(analysis: PayslipAnalysis(
@@ -105,7 +109,6 @@ struct HomeView: View {
                     ))
                 }
             }
-            // 🔴 NEW Route 2: To the Calendar View 🔴
             .navigationDestination(isPresented: $navigateToRoster) {
                 RosterView()
             }
@@ -115,9 +118,12 @@ struct HomeView: View {
                 ScannerView(scannedData: $scannedData)
             }
             .sheet(isPresented: $showRosterScanner) {
-                // 🔴 NEW: When the scanner says 'Saved', trigger the transition 🔴
                 RosterScannerView(onSave: {
-                    // Delay slightly so the sheet animation finishes before navigating
+                    // 🔴 FIX: Flip the Roster checkmark to true when the user saves!
+                    withAnimation {
+                        hasUploadedRoster = true
+                    }
+                    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         navigateToRoster = true
                     }
@@ -128,6 +134,12 @@ struct HomeView: View {
             .onChange(of: scannedData) {
                 if scannedData != nil {
                     showScanner = false
+                    
+                    // 🔴 FIX: Flip the Payslip checkmark to true when the scan finishes!
+                    withAnimation {
+                        hasUploadedPayslip = true
+                    }
+                    
                     isProcessing = true
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
@@ -142,6 +154,11 @@ struct HomeView: View {
     // MARK: - Debug Testing Functions
     func triggerFakeLoading() {
         UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+        
+        withAnimation {
+            hasUploadedPayslip = true
+        }
+        
         isProcessing = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             isProcessing = false

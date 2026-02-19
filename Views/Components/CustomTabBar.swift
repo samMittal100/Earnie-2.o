@@ -25,7 +25,9 @@ struct CustomTabBar: View {
                 selectedTab: $selectedTab
             )
         }
-        .padding(12)
+        // 🔴 FIX 1: Shaved down the outer vertical padding from 12 to 6
+        .padding(.vertical, 6)
+        .padding(.horizontal, 12)
         // MARK: Glassmorphism Background
         .background(
             ZStack {
@@ -57,7 +59,8 @@ struct TabBarButton: View {
                 selectedTab = tab
             }
         }) {
-            VStack(spacing: 4) {
+            // 🔴 FIX 2: Tighter spacing between the icon and text (4 down to 2)
+            VStack(spacing: 2) {
                 Image(systemName: icon)
                     .font(.title3)
                 Text(title)
@@ -65,7 +68,8 @@ struct TabBarButton: View {
                     .fontWeight(.bold)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            // 🔴 FIX 3: Shaved down the inner button padding from 12 to 8
+            .padding(.vertical, 8)
             .background(
                 ZStack {
                     if selectedTab == tab {
