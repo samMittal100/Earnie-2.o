@@ -17,6 +17,9 @@
 		22938B882F43420F00322AD7 /* Payslip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22938B752F42FBD000322AD7 /* Payslip.swift */; };
 		22CE823A2F4600640021DC6E /* AnalysisUnderpaidInsightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22CE82392F4600610021DC6E /* AnalysisUnderpaidInsightView.swift */; };
 		22CE823C2F46024E0021DC6E /* InteractivePayslipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22CE823B2F46024D0021DC6E /* InteractivePayslipView.swift */; };
+		22CE82612F46B99A0021DC6E /* EarnieAnimation.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 22CE82602F46B99A0021DC6E /* EarnieAnimation.mp4 */; };
+		22CE82692F46BEF90021DC6E /* HappyEarnie.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 22CE82682F46BE9C0021DC6E /* HappyEarnie.mp4 */; };
+		22CE826A2F46BEFD0021DC6E /* SadEarnie.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 22CE82672F46BE3B0021DC6E /* SadEarnie.mp4 */; };
 		22EC22172F455DE2009C518A /* Roster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EC22162F455DDF009C518A /* Roster.swift */; };
 		BC1A6A3E2F448FB5004C7B6A /* AnalysisUnderpaidView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A6A3D2F448F9F004C7B6A /* AnalysisUnderpaidView.swift */; };
 		BC1A6A402F44D90C004C7B6A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1A6A3F2F44D901004C7B6A /* OnboardingView.swift */; };
@@ -35,6 +38,9 @@
 		22938B7E2F43012900322AD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		22CE82392F4600610021DC6E /* AnalysisUnderpaidInsightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisUnderpaidInsightView.swift; sourceTree = "<group>"; };
 		22CE823B2F46024D0021DC6E /* InteractivePayslipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractivePayslipView.swift; sourceTree = "<group>"; };
+		22CE82602F46B99A0021DC6E /* EarnieAnimation.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = EarnieAnimation.mp4; sourceTree = "<group>"; };
+		22CE82672F46BE3B0021DC6E /* SadEarnie.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SadEarnie.mp4; sourceTree = "<group>"; };
+		22CE82682F46BE9C0021DC6E /* HappyEarnie.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = HappyEarnie.mp4; sourceTree = "<group>"; };
 		22EC22162F455DDF009C518A /* Roster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Roster.swift; sourceTree = "<group>"; };
 		22EC22252F4564AC009C518A /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		BC1A6A342F441567004C7B6A /* Earnie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Earnie.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,6 +79,9 @@
 				22938B732F42FAEC00322AD7 /* Views */,
 				22938B722F42FADE00322AD7 /* DataBase */,
 				BC1A6A342F441567004C7B6A /* Earnie.app */,
+				22CE82602F46B99A0021DC6E /* EarnieAnimation.mp4 */,
+				22CE82672F46BE3B0021DC6E /* SadEarnie.mp4 */,
+				22CE82682F46BE9C0021DC6E /* HappyEarnie.mp4 */,
 			);
 			sourceTree = "<group>";
 		};
@@ -178,6 +187,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22CE826A2F46BEFD0021DC6E /* SadEarnie.mp4 in Resources */,
+				22CE82612F46B99A0021DC6E /* EarnieAnimation.mp4 in Resources */,
+				22CE82692F46BEF90021DC6E /* HappyEarnie.mp4 in Resources */,
 				22938B7F2F43012900322AD7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

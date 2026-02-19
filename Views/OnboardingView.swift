@@ -5,10 +5,10 @@ struct OnboardingView: View {
     let primaryBlue = Color(red: 0.58, green: 0.69, blue: 0.95)
     let textColor = Color(red: 0.35, green: 0.35, blue: 0.45)
     
-    // 🔴 THE FIX: This permanently saves the state to the device memory
+    // MARK: - 2. STATE
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     
-    // MARK: - 2. MAIN BODY
+    // MARK: - 3. MAIN BODY
     var body: some View {
         VStack {
             Spacer(minLength: 40)
@@ -32,17 +32,15 @@ struct OnboardingView: View {
             
             Spacer()
             
-            // MARK: Mascot Image
-            Image("EarnieMascot")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 220, height: 220)
+            // 🔴 THE FIX: Replaced the static Image with the Looping Video Player
+            // Note: Ensure the string perfectly matches the file name you gave it in Step 1!
+            LoopingVideoPlayer(videoName: "HappyEarnie", videoExtension: "mp4")
+                .frame(width: 400, height: 550) // Adjust size as needed
             
             Spacer()
             
             // MARK: Call To Action Button
             Button {
-                // 🔴 THE FIX: Flipping this to true instantly swaps the root view
                 withAnimation(.spring) {
                     hasSeenOnboarding = true
                 }
@@ -52,7 +50,7 @@ struct OnboardingView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
-                    .background(Color.blue.opacity(0.70))
+                    .background(Color(primaryBlue).opacity(0.70))
                     .cornerRadius(14)
             }
             .padding(.horizontal, 30)
