@@ -1,14 +1,13 @@
 import SwiftUI
 import Combine
 
-// MARK: - Enums
+// MARK: - 1. ENUMS & MODELS
 enum CalendarMode: String, CaseIterable {
     case week = "Week"
     case fortnight = "Fortnight"
     case month = "Month"
 }
 
-// MARK: - Model
 struct Shift: Identifiable, Equatable {
     let id = UUID()
     var date: Date
@@ -25,7 +24,7 @@ struct Shift: Identifiable, Equatable {
     }
 }
 
-// MARK: - ViewModel
+// MARK: - 2. VIEW MODEL (LOGIC)
 class RosterViewModel: ObservableObject {
     
     @Published var selectedDate: Date = Date()
@@ -126,16 +125,17 @@ class RosterViewModel: ObservableObject {
     }
 }
 
-// MARK: - Main View
+// MARK: - 3. MAIN VIEW
 struct RosterView: View {
     
     @StateObject private var viewModel = RosterViewModel()
+    @Environment(\.dismiss) var dismiss // Needed for the Confirm button
     
     // Consistent App Background Color
     let appBackground = Color(red: 243/255, green: 241/255, blue: 247/255)
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack { // 🔴 Removed 'alignment: .bottom' since we aren't floating anymore
             
             // 1. Background
             appBackground.ignoresSafeArea()
@@ -161,18 +161,36 @@ struct RosterView: View {
                         CalendarCardView(viewModel: viewModel)
                             .padding(.horizontal)
                         
-                        // 3️⃣ Summary Section (Modified: Always Visible, removed logic checks)
+                        // Summary Section
                         SummarySection(viewModel: viewModel)
                         
-                        // Spacer to prevent footer overlap
-                        Spacer(minLength: 130)
+                        // 🔴 THE FIX: The Button is now INSIDE the scroll view.
+                        // It stays static at the bottom of the content and scrolls with the screen.
+                        Button(action: {
+                            dismiss() // Sends user back to HomeView
+                        }) {
+                            Text("Confirm Roster")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(Color.blue)
+                                .cornerRadius(16)
+                                .shadow(color: Color.blue.opacity(0.3), radius: 10, y: 5)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 10)
+                        
+                        // 🔴 This extra space ensures the button can scroll completely past your global Tab Bar
+                        Spacer(minLength: 120)
                     }
                     .padding(.bottom, 30)
                 }
             }
-            
-            // 3. Universal Glassy Footer
-            glassyFooter
+        }
+        // Instantly populates the data the moment the screen opens
+        .onAppear {
+            viewModel.loadMockRoster()
         }
         // Advanced Bottom Sheet
         .sheet(item: $viewModel.editingShift) { shift in
@@ -189,53 +207,9 @@ struct RosterView: View {
             .presentationDragIndicator(.visible)
         }
     }
-    
-    // MARK: - Universal Glassy Footer
-    var glassyFooter: some View {
-        HStack(spacing: 0) {
-            // Upload Button
-            Button(action: {
-                viewModel.loadMockRoster()
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 20, weight: .semibold))
-                    Text("Upload")
-                        .font(.caption).fontWeight(.semibold)
-                }
-                .foregroundColor(.blue)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color(red: 235/255, green: 236/255, blue: 238/255))
-                .clipShape(Capsule())
-            }
-            .padding(6)
-            
-            // Archive Button
-            Button(action: {
-                // Archive action here
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "doc.text")
-                        .font(.system(size: 20, weight: .regular))
-                    Text("Archive")
-                        .font(.caption).fontWeight(.medium)
-                }
-                .foregroundColor(.black.opacity(0.7))
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-            }
-            .padding(6)
-        }
-        .background(Color.white)
-        .clipShape(Capsule())
-        .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: 5)
-        .padding(.horizontal, 40)
-        .padding(.bottom, 30)
-    }
 }
 
-// MARK: - Calendar Card (Unchanged)
+// MARK: - 4. CALENDAR COMPONENTS
 struct CalendarCardView: View {
     @ObservedObject var viewModel: RosterViewModel
     let calendar = Calendar.current
@@ -451,7 +425,7 @@ struct CalendarCardView: View {
     }
 }
 
-// MARK: - Summary Section (Always Visible)
+// MARK: - 5. SUMMARY & LIST COMPONENTS
 struct SummarySection: View {
     
     @ObservedObject var viewModel: RosterViewModel
@@ -551,7 +525,7 @@ struct ShiftListRow: View {
     }
 }
 
-// MARK: - Advanced Bottom Sheet
+// MARK: - 6. ADVANCED EDIT SHEET
 struct AdvancedShiftEditView: View {
     
     @State var shift: Shift
@@ -563,13 +537,13 @@ struct AdvancedShiftEditView: View {
     @State private var startHour: Double = 9.0
     @State private var endHour: Double = 17.0
     @State private var breakDuration: Double = 30.0
-    @State private var overtimeDuration: Double = 0.0 // 2️⃣ Overtime State
+    @State private var overtimeDuration: Double = 0.0
     
     // UI Text State
     @State private var startText: String = "09:00"
     @State private var endText: String = "17:00"
     @State private var breakText: String = "30"
-    @State private var overtimeText: String = "0" // 2️⃣ Overtime Text
+    @State private var overtimeText: String = "0"
     
     let themeColor = Color(red: 91/255, green: 80/255, blue: 122/255)
     
@@ -578,7 +552,7 @@ struct AdvancedShiftEditView: View {
             ScrollView {
                 VStack(spacing: 30) {
                     
-                    // 1️⃣ Timeline Visualization (Modified)
+                    // Timeline Visualization
                     TimelineView(
                         startHour: startHour,
                         endHour: endHour,
@@ -600,22 +574,18 @@ struct AdvancedShiftEditView: View {
                     // Inputs
                     VStack(spacing: 25) {
                         
-                        // Start Time Input
                         TimeInputRow(title: "Start Time", icon: "clock", text: $startText, themeColor: themeColor) {
                             validateAndUpdateStart()
                         }
                         
-                        // End Time Input
                         TimeInputRow(title: "End Time", icon: "clock.fill", text: $endText, themeColor: themeColor) {
                             validateAndUpdateEnd()
                         }
                         
-                        // Break Input
                         BreakInputRow(title: "Break (min)", icon: "cup.and.saucer.fill", text: $breakText, themeColor: themeColor) {
                             validateAndUpdateBreak()
                         }
                         
-                        // 2️⃣ Overtime Input (Added)
                         OvertimeInputRow(title: "Overtime (min)", icon: "hourglass.badge.plus", text: $overtimeText, themeColor: themeColor) {
                             validateAndUpdateOvertime()
                         }
@@ -659,8 +629,7 @@ struct AdvancedShiftEditView: View {
         }
     }
     
-    // MARK: - Logic & Validation
-    
+    // Logic & Validation
     func loadFromModel() {
         let calendar = Calendar.current
         let startComp = calendar.dateComponents([.hour, .minute], from: shift.startTime)
@@ -671,7 +640,6 @@ struct AdvancedShiftEditView: View {
         breakDuration = shift.breakDurationMinutes
         overtimeDuration = shift.overtimeMinutes
         
-        // Init Strings
         startText = formatTimeForInput(hour: startHour)
         endText = formatTimeForInput(hour: endHour)
         breakText = "\(Int(breakDuration))"
@@ -723,7 +691,6 @@ struct AdvancedShiftEditView: View {
         }
     }
     
-    // Helper: "09:30" -> 9.5
     func timeStringToDouble(_ time: String) -> Double? {
         let pattern = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
         guard time.range(of: pattern, options: .regularExpression) != nil else { return nil }
@@ -735,7 +702,6 @@ struct AdvancedShiftEditView: View {
         return h + (m / 60.0)
     }
     
-    // Helper: 9.5 -> "09:30"
     func formatTimeForInput(hour: Double) -> String {
         let h = Int(hour)
         let m = Int((hour - Double(h)) * 60)
@@ -760,8 +726,7 @@ struct AdvancedShiftEditView: View {
     }
 }
 
-// MARK: - Input Components
-
+// MARK: - 7. EDIT SHEET COMPONENTS
 struct TimeInputRow: View {
     let title: String
     let icon: String
@@ -769,7 +734,6 @@ struct TimeInputRow: View {
     let themeColor: Color
     var onCommit: () -> Void
     
-    // Generate 15 min intervals for 24h
     let timeOptions: [String] = {
         var times: [String] = []
         for h in 0..<24 {
@@ -790,7 +754,6 @@ struct TimeInputRow: View {
             }
             
             HStack(spacing: 0) {
-                // Manual Input
                 TextField("HH:mm", text: $text)
                     .keyboardType(.numbersAndPunctuation)
                     .multilineTextAlignment(.leading)
@@ -802,13 +765,12 @@ struct TimeInputRow: View {
                         onCommit()
                     }
                 
-                // Dropdown Menu
                 Menu {
                     ScrollView {
                         ForEach(timeOptions, id: \.self) { time in
                             Button(time) {
                                 text = time
-                                onCommit() // Trigger update immediately on selection
+                                onCommit()
                             }
                         }
                     }
@@ -889,7 +851,6 @@ struct BreakInputRow: View {
     }
 }
 
-// 2️⃣ New Overtime Input Component
 struct OvertimeInputRow: View {
     let title: String
     let icon: String
@@ -897,7 +858,6 @@ struct OvertimeInputRow: View {
     let themeColor: Color
     var onCommit: () -> Void
     
-    // Requested options: 0, 15, 30, 45, 60, 90, 120
     let options = [0, 15, 30, 45, 60, 90, 120]
     
     var body: some View {
@@ -948,29 +908,23 @@ struct OvertimeInputRow: View {
     }
 }
 
-// MARK: - Components for Bottom Sheet
-
-// 1️⃣ REWRITTEN TIMELINE VIEW
 struct TimelineView: View {
     var startHour: Double
     var endHour: Double
     var breakDuration: Double
     var overtimeDuration: Double
     
-    // Theme Colors
-    let workColor = Color(red: 136/255, green: 161/255, blue: 243/255) // Soft Blue (Card Theme)
-    let breakColor = Color(red: 136/255, green: 161/255, blue: 243/255).opacity(0.35) // Muted Blue variation
-    let overtimeColor = Color(red: 83/255, green: 86/255, blue: 133/255) // Deep Purple-Blue (Mascot Theme)
+    let workColor = Color(red: 136/255, green: 161/255, blue: 243/255)
+    let breakColor = Color(red: 136/255, green: 161/255, blue: 243/255).opacity(0.35)
+    let overtimeColor = Color(red: 83/255, green: 86/255, blue: 133/255)
     
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                // Background Grid
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.gray.opacity(0.15))
                     .frame(height: 40)
                 
-                // Hour Markers (0, 6, 12, 18, 24)
                 HStack(spacing: 0) {
                     ForEach(0..<5) { i in
                         Text("\(i * 6)")
@@ -981,24 +935,14 @@ struct TimelineView: View {
                 }
                 .offset(y: 35)
                 
-                // --- Timeline Logic ---
-                // 1. Calculate Shift Basics
                 let shiftDurationHours = endHour - startHour
                 let overtimeHours = overtimeDuration / 60.0
                 
-                // 2. Calculate Visual Positioning on 24h Grid
                 let widthPerHour = geo.size.width / 24.0
                 let startX = startHour * widthPerHour
                 
-                // 3. Total Pixel Width of the entire visual bar (Main Shift + Overtime)
                 let totalVisualHours = shiftDurationHours + overtimeHours
                 let totalBarWidth = max(0, totalVisualHours * widthPerHour)
-                
-                // 4. Calculate Internal Proportions
-                // Logic:
-                // totalMinutes = totalShiftMinutes + overtimeMinutes
-                // workMinutes = totalShiftMinutes - breakMinutes
-                // preBreak = work / 2, postBreak = work / 2
                 
                 let totalShiftMinutes = shiftDurationHours * 60.0
                 let actualWorkMinutes = max(0, totalShiftMinutes - breakDuration)
@@ -1009,29 +953,24 @@ struct TimelineView: View {
                 
                 if totalBarWidth > 0 && totalVisualMinutes > 0 {
                     HStack(spacing: 0) {
-                        
-                        // Segment 1: Pre-Break Work (Soft Blue)
                         Rectangle()
                             .fill(workColor)
                             .frame(width: (preBreakWork / totalVisualMinutes) * totalBarWidth)
                         
-                        // Segment 2: Break (Muted Blue)
                         Rectangle()
                             .fill(breakColor)
                             .frame(width: (breakDuration / totalVisualMinutes) * totalBarWidth)
                         
-                        // Segment 3: Post-Break Work (Soft Blue)
                         Rectangle()
                             .fill(workColor)
                             .frame(width: (postBreakWork / totalVisualMinutes) * totalBarWidth)
                         
-                        // Segment 4: Overtime (Deep Purple-Blue)
                         Rectangle()
                             .fill(overtimeColor)
                             .frame(width: (overtimeDuration / totalVisualMinutes) * totalBarWidth)
                     }
                     .frame(width: totalBarWidth, height: 40)
-                    .clipShape(RoundedRectangle(cornerRadius: 8)) // Entire bar has rounded corners
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                     .offset(x: startX)
                     .animation(.spring(response: 0.4, dampingFraction: 0.7), value: startHour)
                     .animation(.spring(response: 0.4, dampingFraction: 0.7), value: endHour)
@@ -1061,9 +1000,6 @@ struct StatView: View {
     }
 }
 
-// MARK: - Preview
-struct RosterView_Previews: PreviewProvider {
-    static var previews: some View {
-        RosterView()
-    }
+#Preview {
+    RosterView()
 }

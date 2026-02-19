@@ -303,10 +303,8 @@ struct AnalysisUnderpaidInsightView: View {
         .padding(.horizontal)
         .foregroundColor(.black)
         .sheet(isPresented: $showInteractivePayslip) {
-            // Placeholder for sheet content (assumed existing in project)
-            Text("Interactive Payslip View")
-        }
-    }
+                    InteractivePayslipView()
+                }    }
 
     // MARK: - CONTACTS SECTION (Uses the component defined below)
     var contactsSection: some View {
