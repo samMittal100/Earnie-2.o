@@ -46,7 +46,17 @@ struct RosterScannerView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.blue)
+                            .background(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 139/255, green: 171/255, blue: 241/255), // primary
+                                        Color(red: 94/255, green: 114/255, blue: 196/255)   // accent
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+
                             .foregroundColor(.white)
                             .cornerRadius(10)
                         }
@@ -59,7 +69,12 @@ struct RosterScannerView: View {
                     if !statusMessage.isEmpty && !isScanning {
                         Text(statusMessage)
                             .font(.caption)
-                            .foregroundColor(statusMessage.contains("Success") ? .green : .orange)
+                            .foregroundColor(
+                                statusMessage.contains("Success")
+                                ? Color(red: 94/255, green: 114/255, blue: 196/255)
+                                : Color(red: 139/255, green: 171/255, blue: 241/255)
+                            )
+
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
@@ -72,7 +87,18 @@ struct RosterScannerView: View {
                                 Text("Roster: \(targetName)")
                                     .font(.headline)
                                 Text(rosterDateRange)
-                                    .font(.caption).bold().foregroundColor(.blue)
+                                    .font(.caption)
+                                    .bold()
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [
+                                                Color(red: 139/255, green: 171/255, blue: 241/255),
+                                                Color(red: 94/255, green: 114/255, blue: 196/255)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
                             }
                             
                             Divider()
@@ -81,7 +107,8 @@ struct RosterScannerView: View {
                                 Text("Total Hours")
                                 Spacer()
                                 Text("\(String(format: "%.1f", totalHours))h")
-                                    .font(.title2).bold().foregroundColor(.green)
+                                    .font(.title2).bold().foregroundColor(Color(red: 94/255, green: 114/255, blue: 196/255))
+
                             }
                             
                             Divider()
@@ -107,16 +134,25 @@ struct RosterScannerView: View {
                                 Divider()
                             }
                             
-                            // Save Button
                             Button(action: saveRoster) {
                                 Text("Save Roster to Earnie")
                                     .font(.headline)
                                     .frame(maxWidth: .infinity)
                                     .padding()
-                                    .background(Color.green)
+                                    .background(
+                                        LinearGradient(
+                                            colors: [
+                                                Color(red: 139/255, green: 171/255, blue: 241/255),
+                                                Color(red: 94/255, green: 114/255, blue: 196/255)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
                                     .foregroundColor(.white)
                                     .cornerRadius(12)
                             }
+
                             .padding(.top, 10)
                         }
                         .padding()

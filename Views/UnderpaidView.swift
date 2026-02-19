@@ -53,7 +53,9 @@ struct UnderpaidView: View {
     // MARK: - 5. SPLASH SCREEN CONTENT
     var underpaidSplashContent: some View {
         ZStack {
-            primaryBlue.opacity(0.2).ignoresSafeArea()
+            Color(red: 0.96, green: 0.97, blue: 1.0)
+                .ignoresSafeArea()
+
             
             VStack {
                 Spacer()

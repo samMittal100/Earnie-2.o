@@ -174,7 +174,7 @@ struct RosterView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .background(Color.blue)
+                                .background(Color(red: 144/255, green: 174/255, blue: 242/255))
                                 .cornerRadius(16)
                                 .shadow(color: Color.blue.opacity(0.3), radius: 10, y: 5)
                         }
@@ -358,7 +358,7 @@ struct CalendarCardView: View {
                     .frame(width: 32, height: 32)
                     .background(
                         Circle()
-                            .fill(isSelected ? Color.blue : Color.clear)
+                            .fill(isSelected ? Color(red: 144/255, green: 174/255, blue: 242/255) : Color.clear)
                     )
                 
                 // Shift Dot Indicator
@@ -1017,3 +1017,4 @@ struct StatView: View {
 #Preview {
     RosterView()
 }
+
